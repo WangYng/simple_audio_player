@@ -1,11 +1,15 @@
 package io.github.wangyng.simple_audio_player;
 
 import android.content.Context;
+import android.util.Log;
 
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import io.flutter.FlutterInjector;
+import io.flutter.embedding.engine.loader.FlutterLoader;
+import io.flutter.embedding.engine.plugins.FlutterPlugin;
 import io.flutter.plugin.common.BasicMessageChannel;
 import io.flutter.plugin.common.BinaryMessenger;
 import io.flutter.plugin.common.EventChannel;
@@ -14,6 +18,8 @@ import io.flutter.plugin.common.StandardMessageCodec;
 public interface SimpleAudioPlayerApi {
 
     void setSongStateStream(Context context, SimpleAudioPlayerEventSink songStateStream);
+
+    void setAudioFocusStream(Context context, SimpleAudioPlayerEventSink audioFocusStream);
 
     void init(Context context, int playerId);
 
@@ -31,7 +37,12 @@ public interface SimpleAudioPlayerApi {
 
     Long getDuration(Context context, int playerId);
 
-    static void setup(BinaryMessenger binaryMessenger, SimpleAudioPlayerApi api, Context context) {
+    boolean tryToGetAudioFocus(Context context);
+
+    void giveUpAudioFocus(Context context);
+
+    static void setup(FlutterPlugin.FlutterPluginBinding binding, SimpleAudioPlayerApi api, Context context) {
+        BinaryMessenger binaryMessenger = binding.getBinaryMessenger();
 
         {
             EventChannel eventChannel = new EventChannel(binaryMessenger, "io.github.wangyng.simple_audio_player/songStateStream");
@@ -49,6 +60,27 @@ public interface SimpleAudioPlayerApi {
                     }
                 });
                 api.setSongStateStream(context, eventSink);
+            } else {
+                eventChannel.setStreamHandler(null);
+            }
+        }
+
+        {
+            EventChannel eventChannel = new EventChannel(binaryMessenger, "io.github.wangyng.simple_audio_player/audioFocusStream");
+            SimpleAudioPlayerEventSink eventSink = new SimpleAudioPlayerEventSink();
+            if (api != null) {
+                eventChannel.setStreamHandler(new EventChannel.StreamHandler() {
+                    @Override
+                    public void onListen(Object arguments, EventChannel.EventSink events) {
+                        eventSink.event = events;
+                    }
+
+                    @Override
+                    public void onCancel(Object arguments) {
+                        eventSink.event = null;
+                    }
+                });
+                api.setAudioFocusStream(context, eventSink);
             } else {
                 eventChannel.setStreamHandler(null);
             }
@@ -83,6 +115,12 @@ public interface SimpleAudioPlayerApi {
                         HashMap<String, Object> params = (HashMap<String, Object>) message;
                         int playerId = (int)params.get("playerId");
                         String uri = (String)params.get("uri");
+                        if (uri.startsWith("asset:///")) {
+                            FlutterLoader loader = FlutterInjector.instance().flutterLoader();
+                            String filename = loader.getLookupKeyForAsset(uri.substring("asset:///".length()));
+                            uri = "asset:///" + filename;
+                        }
+
                         api.prepare(context, playerId, uri);
                         wrapped.put("result", null);
                     } catch (Exception exception) {
@@ -206,6 +244,42 @@ public interface SimpleAudioPlayerApi {
                         int playerId = (int)params.get("playerId");
                         Long result = api.getDuration(context, playerId);
                         wrapped.put("result", result);
+                    } catch (Exception exception) {
+                        wrapped.put("error", wrapError(exception));
+                    }
+                    reply.reply(wrapped);
+                });
+            } else {
+                channel.setMessageHandler(null);
+            }
+        }
+
+        {
+            BasicMessageChannel<Object> channel = new BasicMessageChannel<>(binaryMessenger, "io.github.wangyng.simple_audio_player.tryToGetAudioFocus", new StandardMessageCodec());
+            if (api != null) {
+                channel.setMessageHandler((message, reply) -> {
+                    Map<String, Object> wrapped = new HashMap<>();
+                    try {
+                        boolean result = api.tryToGetAudioFocus(context);
+                        wrapped.put("result", result);
+                    } catch (Exception exception) {
+                        wrapped.put("error", wrapError(exception));
+                    }
+                    reply.reply(wrapped);
+                });
+            } else {
+                channel.setMessageHandler(null);
+            }
+        }
+
+        {
+            BasicMessageChannel<Object> channel = new BasicMessageChannel<>(binaryMessenger, "io.github.wangyng.simple_audio_player.giveUpAudioFocus", new StandardMessageCodec());
+            if (api != null) {
+                channel.setMessageHandler((message, reply) -> {
+                    Map<String, Object> wrapped = new HashMap<>();
+                    try {
+                        api.giveUpAudioFocus(context);
+                        wrapped.put("result", null);
                     } catch (Exception exception) {
                         wrapped.put("error", wrapError(exception));
                     }

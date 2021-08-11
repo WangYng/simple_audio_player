@@ -2,7 +2,7 @@
 //  SimpleAudioPlayerApi.h
 //  Pods
 //
-//  Created by 汪洋 on 2021/8/6.
+//  Created by 汪洋 on 2021/8/11.
 //
 
 #import <Foundation/Foundation.h>
@@ -12,6 +12,8 @@
 @protocol SimpleAudioPlayerApiDelegate <NSObject>
 
 - (void)setSongStateStream:(SimpleAudioPlayerEventSink *)songStateStream;
+
+- (void)setAudioFocusStream:(SimpleAudioPlayerEventSink *)audioFocusStream;
 
 - (void)initWithPlayerId:(NSInteger)playerId;
 
@@ -29,11 +31,15 @@
 
 - (NSInteger)getDurationWithPlayerId:(NSInteger)playerId;
 
+- (BOOL)tryToGetAudioFocus;
+
+- (void)giveUpAudioFocus;
+
 @end
 
 @interface SimpleAudioPlayerApi : NSObject
 
-+ (void)setup:(NSObject<FlutterBinaryMessenger> *)messenger api:(id<SimpleAudioPlayerApiDelegate>)api;
++ (void)setup:(NSObject<FlutterPluginRegistrar> *)registrar api:(id<SimpleAudioPlayerApiDelegate>)api;
 
 @end
 

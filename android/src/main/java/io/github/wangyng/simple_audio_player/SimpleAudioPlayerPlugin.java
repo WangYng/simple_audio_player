@@ -11,29 +11,39 @@ import java.util.HashMap;
 import java.util.Map;
 
 import io.flutter.embedding.engine.plugins.FlutterPlugin;
+import io.github.wangyng.simple_audio_player.player.AudioFocusManager;
 import io.github.wangyng.simple_audio_player.player.ExoPlayerManager;
 import io.github.wangyng.simple_audio_player.player.PlayerManager;
 import io.github.wangyng.simple_audio_player.player.Song;
 
 
-public class SimpleAudioPlayerPlugin implements FlutterPlugin, SimpleAudioPlayerApi {
+public class SimpleAudioPlayerPlugin implements FlutterPlugin, SimpleAudioPlayerApi, AudioFocusManager.AudioFocusChangeCallback {
 
     Map<Integer, PlayerManager> playerManagerMap = new HashMap<>();
     SimpleAudioPlayerEventSink songStateStream;
 
+    AudioFocusManager audioFocusManager;
+    SimpleAudioPlayerEventSink audioFocusStream;
+
+
     @Override
     public void onAttachedToEngine(@NonNull FlutterPluginBinding binding) {
-        SimpleAudioPlayerApi.setup(binding.getBinaryMessenger(), this, binding.getApplicationContext());
+        SimpleAudioPlayerApi.setup(binding, this, binding.getApplicationContext());
     }
 
     @Override
     public void onDetachedFromEngine(@NonNull FlutterPluginBinding binding) {
-        SimpleAudioPlayerApi.setup(binding.getBinaryMessenger(), null, null);
+        SimpleAudioPlayerApi.setup(binding, null, null);
     }
 
     @Override
     public void setSongStateStream(Context context, SimpleAudioPlayerEventSink songStateStream) {
         this.songStateStream = songStateStream;
+    }
+
+    @Override
+    public void setAudioFocusStream(Context context, SimpleAudioPlayerEventSink audioFocusStream) {
+        this.audioFocusStream = audioFocusStream;
     }
 
     @Override
@@ -126,5 +136,30 @@ public class SimpleAudioPlayerPlugin implements FlutterPlugin, SimpleAudioPlayer
     public Long getDuration(Context context, int playerId) {
         PlayerManager player = playerManagerMap.get(playerId);
         return player.getDuration();
+    }
+
+    @Override
+    public boolean tryToGetAudioFocus(Context context) {
+        if (audioFocusManager == null) {
+            audioFocusManager = new AudioFocusManager(context);
+        }
+        return audioFocusManager.tryToGetAudioFocus(this);
+    }
+
+    @Override
+    public void giveUpAudioFocus(Context context) {
+        if (audioFocusManager != null) {
+            audioFocusManager.giveUpAudioFocus();
+        }
+    }
+
+    @Override
+    public void onAudioFocused() {
+        audioFocusStream.event.success("audioFocused");
+    }
+
+    @Override
+    public void onAudioNoFocus() {
+        audioFocusStream.event.success("audioNoFocus");
     }
 }

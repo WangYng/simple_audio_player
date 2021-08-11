@@ -8,13 +8,17 @@
 #import "SimpleAudioPlayerPlugin.h"
 #import "SimpleAudioPlayerEventSink.h"
 #import "player/SimpleAudioPlayerManager.h"
+#import "player/SimpleAudioFocusManager.h"
 
-@interface SimpleAudioPlayerPlugin ()
+@interface SimpleAudioPlayerPlugin () <SimpleAudioFocusChangeDelegate>
 
-@property(nonatomic, strong) NSMutableDictionary* playerManagerMap;
-@property(nonatomic, strong) NSMutableDictionary* playerManagerDelegateMap;
+@property(nonatomic, strong) NSMutableDictionary *playerManagerMap;
+@property(nonatomic, strong) NSMutableDictionary *playerManagerDelegateMap;
 
-@property(nonatomic, strong) SimpleAudioPlayerEventSink* songStateStream;
+@property(nonatomic, strong) SimpleAudioPlayerEventSink *songStateStream;
+
+@property(nonatomic, strong) SimpleAudioFocusManager *audioFocusManager;
+@property(nonatomic, strong) SimpleAudioPlayerEventSink *audioFocusStream;
 
 @end
 
@@ -30,7 +34,7 @@
 
 + (void)registerWithRegistrar:(NSObject<FlutterPluginRegistrar>*)registrar {
     SimpleAudioPlayerPlugin* instance = [[SimpleAudioPlayerPlugin alloc] init];
-    [SimpleAudioPlayerApi setup:[registrar messenger] api:instance];
+    [SimpleAudioPlayerApi setup:registrar api:instance];
 }
 
 - (instancetype)init {
@@ -61,8 +65,8 @@
     NSURL *url;
     if ([uri hasPrefix:@"http"]) {
         url = [[NSURL alloc] initWithString:uri];
-    } else {
-        url = [[NSURL alloc] initFileURLWithPath:uri];
+    } else if ([uri hasPrefix:@"file://"]){
+        url = [[NSURL alloc] initFileURLWithPath:[uri substringFromIndex:@"file://".length]];
     }
     SimpleAudioPlayerSong *song = [[SimpleAudioPlayerSong alloc] initWithSource:url];
     [player prepareWithSong:song];
@@ -81,9 +85,6 @@
 - (void)stopWithPlayerId:(NSInteger)playerId {
     SimpleAudioPlayerManager *player = self.playerManagerMap[@(playerId)];
     [player stop];
-    
-    self.playerManagerMap[@(playerId)] = nil;
-    self.playerManagerDelegateMap[@(playerId)] = nil;
 }
 
 - (void)seekToWithPlayerId:(NSInteger)playerId position:(NSInteger)position {
@@ -99,6 +100,26 @@
 - (NSInteger)getDurationWithPlayerId:(NSInteger)playerId {
     SimpleAudioPlayerManager *player = self.playerManagerMap[@(playerId)];
     return player.duration;
+}
+
+- (void)giveUpAudioFocus {
+    [self.audioFocusManager giveUpAudioFocus];
+}
+
+- (BOOL)tryToGetAudioFocus {
+    if (self.audioFocusManager == nil) {
+        self.audioFocusManager = [[SimpleAudioFocusManager alloc] init];
+    }
+    self.audioFocusManager.delegate = self;
+    return [self.audioFocusManager tryToGetAudioFocus];
+}
+
+- (void)onAudioFocused {
+    self.audioFocusStream.event(@"audioFocused");
+}
+
+- (void)onAudioNoFocus {
+    self.audioFocusStream.event(@"audioNoFocus");
 }
 
 @end

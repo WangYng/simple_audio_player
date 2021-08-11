@@ -27,7 +27,7 @@ class AudioFocusManager(private val context: Context) {
         val result = mAudioManager?.requestAudioFocus(
             mOnAudioFocusChangeListener,
             AudioManager.STREAM_MUSIC,
-            AudioManager.AUDIOFOCUS_GAIN
+            AudioManager.AUDIOFOCUS_GAIN_TRANSIENT
         )
 
         if (result == AudioManager.AUDIOFOCUS_REQUEST_GRANTED) {

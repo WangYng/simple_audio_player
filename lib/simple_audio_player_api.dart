@@ -6,6 +6,8 @@ class SimpleAudioPlayerApi {
 
   static Stream songStateStream = EventChannel("io.github.wangyng.simple_audio_player/songStateStream").receiveBroadcastStream();
 
+  static Stream audioFocusStream = EventChannel("io.github.wangyng.simple_audio_player/audioFocusStream").receiveBroadcastStream();
+
   static Future<void> init({required int playerId}) async {
     const channel = BasicMessageChannel<dynamic>('io.github.wangyng.simple_audio_player.init', StandardMessageCodec());
 
@@ -173,6 +175,46 @@ class SimpleAudioPlayerApi {
       return 0;
     } else {
       return replyMap["result"];
+    }
+  }
+
+  static Future<bool> tryToGetAudioFocus() async {
+    const channel = BasicMessageChannel<dynamic>('io.github.wangyng.simple_audio_player.tryToGetAudioFocus', StandardMessageCodec());
+
+    final Map<String, dynamic> requestMap = {};
+    final reply = await channel.send(requestMap);
+
+    if (!(reply is Map)) {
+      _throwChannelException();
+    }
+
+    final replyMap = Map<String, dynamic>.from(reply);
+    if (replyMap['error'] != null) {
+      final error = Map<String, dynamic>.from(replyMap['error']);
+      _throwException(error);
+      return false;
+    } else {
+      return replyMap["result"];
+    }
+  }
+
+  static Future<void> giveUpAudioFocus() async {
+    const channel = BasicMessageChannel<dynamic>('io.github.wangyng.simple_audio_player.giveUpAudioFocus', StandardMessageCodec());
+
+    final Map<String, dynamic> requestMap = {};
+    final reply = await channel.send(requestMap);
+
+    if (!(reply is Map)) {
+      _throwChannelException();
+    }
+
+    final replyMap = Map<String, dynamic>.from(reply);
+    if (replyMap['error'] != null) {
+      final error = Map<String, dynamic>.from(replyMap['error']);
+      _throwException(error);
+      
+    } else {
+      // noop
     }
   }
 
