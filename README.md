@@ -8,7 +8,7 @@ A simple audio player for Flutter.
 
 ```yaml
 dependencies:
-  simple_audio_player: ^0.0.2
+  simple_audio_player: ^0.0.3
 ```
 
 2. Install it
@@ -74,6 +74,18 @@ $ flutter packages get
       simpleAudioPlayer.stop();
     },
   ),
+  CupertinoButton(
+    child: Text("showNotification"),
+    onPressed: () => notificationManager.showNotification(title: "title", artist: "artist", clipArt: ""),
+  ),
+  CupertinoButton(
+    child: Text("updateNotification"),
+    onPressed: () => notificationManager.updateNotification(showPlay: false, title: "update", artist: "update", clipArt: ""),
+  ),
+  CupertinoButton(
+    child: Text("cancelNotification"),
+    onPressed: () => notificationManager.cancelNotification(),
+  ),
 ```
 
 ## Feature
@@ -81,4 +93,4 @@ $ flutter packages get
 - [x] play online mp3 file
 - [x] play local mp3 file
 - [x] play assets mp3 file
-
+- [x] audio notification manager

@@ -1,6 +1,7 @@
 package io.github.wangyng.simple_audio_player.player
 
 import android.content.Context
+import android.net.Uri
 import android.os.Handler
 import android.os.Looper
 import android.os.Message
@@ -21,7 +22,7 @@ class ExoPlayerManager(private val context: Context) : PlayerManager {
 
     private val mEventListener = ExoPlayerEventListener()
     private var mExoSongStateCallback: PlayerManager.SongStateCallback? = null
-    private var mCurrentSong: Song? = null
+    private var mCurrentUri: Uri? = null
     private var mExoPlayer: SimpleExoPlayer? = null
 
     private val mUpdateProgressHandler = object : Handler(Looper.getMainLooper()) {
@@ -49,15 +50,15 @@ class ExoPlayerManager(private val context: Context) : PlayerManager {
         return mExoPlayer?.duration ?: 0
     }
 
-    override fun prepare(song: Song) {
+    override fun prepare(uri: Uri) {
 
-        val songHasChanged = song != mCurrentSong
+        val songHasChanged = uri != mCurrentUri
         if (songHasChanged) {
-            mCurrentSong = song
+            mCurrentUri = uri
         }
 
         if (songHasChanged || mExoPlayer == null) {
-            val source = mCurrentSong?.source
+            val source = mCurrentUri
             if (mExoPlayer == null) {
                 mExoPlayer = SimpleExoPlayer.Builder(context).build()
                 mExoPlayer?.addListener(mEventListener)

@@ -6,7 +6,6 @@
 //
 
 #import <Foundation/Foundation.h>
-#import "SimpleAudioPlayerSong.h"
 
 @protocol SimpleAudioPlayerStateDelegate <NSObject>
 @required
@@ -31,7 +30,7 @@
 @property (nonatomic, assign, readonly) NSInteger duration;
 
  
-- (void)prepareWithSong:(SimpleAudioPlayerSong *)song;
+- (void)prepareWithUrl:(NSURL *)url;
 
 - (void)play;
 

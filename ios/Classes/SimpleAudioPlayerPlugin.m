@@ -9,16 +9,19 @@
 #import "SimpleAudioPlayerEventSink.h"
 #import "player/SimpleAudioPlayerManager.h"
 #import "player/SimpleAudioFocusManager.h"
+#import "player/SimpleAudioNotificationManager.h"
 
-@interface SimpleAudioPlayerPlugin () <SimpleAudioFocusChangeDelegate>
+@interface SimpleAudioPlayerPlugin () <SimpleAudioFocusChangeDelegate, SimpleAudioNotificationDelegate>
 
 @property(nonatomic, strong) NSMutableDictionary *playerManagerMap;
 @property(nonatomic, strong) NSMutableDictionary *playerManagerDelegateMap;
-
 @property(nonatomic, strong) SimpleAudioPlayerEventSink *songStateStream;
 
 @property(nonatomic, strong) SimpleAudioFocusManager *audioFocusManager;
 @property(nonatomic, strong) SimpleAudioPlayerEventSink *audioFocusStream;
+
+@property(nonatomic, strong) SimpleAudioNotificationManager *notificationManager;
+@property(nonatomic, strong) SimpleAudioPlayerEventSink *notificationStream;
 
 @end
 
@@ -46,10 +49,6 @@
     return self;
 }
 
-- (void)setSongStateStream:(SimpleAudioPlayerEventSink *)songStateStream {
-    _songStateStream = songStateStream;
-}
-
 - (void)initWithPlayerId:(NSInteger)playerId {
     SimpleAudioPlayerManager *player = [[SimpleAudioPlayerManager alloc] init];
     SimpleAudioPlayerStateImpl *playerDelegate = [[SimpleAudioPlayerStateImpl alloc] init];
@@ -68,8 +67,7 @@
     } else if ([uri hasPrefix:@"file://"]){
         url = [[NSURL alloc] initFileURLWithPath:[uri substringFromIndex:@"file://".length]];
     }
-    SimpleAudioPlayerSong *song = [[SimpleAudioPlayerSong alloc] initWithSource:url];
-    [player prepareWithSong:song];
+    [player prepareWithUrl:url];
 }
 
 - (void)playWithPlayerId:(NSInteger)playerId {
@@ -115,11 +113,63 @@
 }
 
 - (void)onAudioFocused {
-    self.audioFocusStream.event(@"audioFocused");
+    if (self.audioFocusStream) {
+        self.audioFocusStream.event(@"audioFocused");
+    }
 }
 
 - (void)onAudioNoFocus {
-    self.audioFocusStream.event(@"audioNoFocus");
+    if (self.audioFocusStream) {
+        self.audioFocusStream.event(@"audioNoFocus");
+    }
+}
+
+- (void)showNotificationWithTitle:(NSString *)title artist:(NSString *)artist clipArt:(NSString *)clipArt {
+    if (self.notificationManager == nil) {
+        self.notificationManager = [[SimpleAudioNotificationManager alloc] init];
+        self.notificationManager.delegate = self;
+    }
+    SimpleAudioPlayerSong *song = [[SimpleAudioPlayerSong alloc] initWithTitle:title artist:artist clipArt:clipArt];
+    [self.notificationManager showNotificationWithSong:song];
+}
+
+- (void)updateNotificationWithShowPlay:(BOOL)showPlay title:(NSString *)title artist:(NSString *)artist clipArt:(NSString *)clipArt {
+    SimpleAudioPlayerSong *song = [[SimpleAudioPlayerSong alloc] initWithTitle:title artist:artist clipArt:clipArt];
+    [self.notificationManager updateNotificationWithShowPlay:showPlay song:song];
+}
+
+- (void)cancelNotification {
+    [self.notificationManager cancelNotification];
+}
+
+- (void)onReceivePause {
+    if (self.notificationStream) {
+        self.notificationStream.event(@"onPause");
+    }
+}
+
+- (void)onReceivePlay {
+    if (self.notificationStream) {
+        self.notificationStream.event(@"onPlay");
+    }
+}
+
+- (void)onReceiveSkipToNext {
+    if (self.notificationStream) {
+        self.notificationStream.event(@"onSkipToNext");
+    }
+}
+
+- (void)onReceiveSkipToPrevious {
+    if (self.notificationStream) {
+        self.notificationStream.event(@"onSkipToPrevious");
+    }
+}
+
+- (void)onReceiveStop {
+    if (self.notificationStream) {
+        self.notificationStream.event(@"onStop");
+    }
 }
 
 @end

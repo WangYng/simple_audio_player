@@ -1,3 +1,9 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-  package="io.github.wangyng.simple_audio_player">
+    package="io.github.wangyng.simple_audio_player">
+
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
+
+    <application>
+        <service android:name=".player.AudioNotificationServer" />
+    </application>
 </manifest>

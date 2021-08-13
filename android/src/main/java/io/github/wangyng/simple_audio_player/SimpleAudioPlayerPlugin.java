@@ -12,6 +12,7 @@ import java.util.Map;
 
 import io.flutter.embedding.engine.plugins.FlutterPlugin;
 import io.github.wangyng.simple_audio_player.player.AudioFocusManager;
+import io.github.wangyng.simple_audio_player.player.AudioNotificationManager;
 import io.github.wangyng.simple_audio_player.player.ExoPlayerManager;
 import io.github.wangyng.simple_audio_player.player.PlayerManager;
 import io.github.wangyng.simple_audio_player.player.Song;
@@ -25,6 +26,8 @@ public class SimpleAudioPlayerPlugin implements FlutterPlugin, SimpleAudioPlayer
     AudioFocusManager audioFocusManager;
     SimpleAudioPlayerEventSink audioFocusStream;
 
+    AudioNotificationManager audioNotificationManager;
+    SimpleAudioPlayerEventSink notificationEventStream;
 
     @Override
     public void onAttachedToEngine(@NonNull FlutterPluginBinding binding) {
@@ -44,6 +47,11 @@ public class SimpleAudioPlayerPlugin implements FlutterPlugin, SimpleAudioPlayer
     @Override
     public void setAudioFocusStream(Context context, SimpleAudioPlayerEventSink audioFocusStream) {
         this.audioFocusStream = audioFocusStream;
+    }
+
+    @Override
+    public void setNotificationEventStream(Context context, SimpleAudioPlayerEventSink notificationEventStream) {
+        this.notificationEventStream = notificationEventStream;
     }
 
     @Override
@@ -99,7 +107,7 @@ public class SimpleAudioPlayerPlugin implements FlutterPlugin, SimpleAudioPlayer
     @Override
     public void prepare(Context context, int playerId, String uri) {
         PlayerManager player = playerManagerMap.get(playerId);
-        player.prepare(new Song(Uri.parse(uri)));
+        player.prepare(Uri.parse(uri));
     }
 
     @Override
@@ -155,11 +163,74 @@ public class SimpleAudioPlayerPlugin implements FlutterPlugin, SimpleAudioPlayer
 
     @Override
     public void onAudioFocused() {
-        audioFocusStream.event.success("audioFocused");
+        if (audioFocusStream.event != null) {
+            audioFocusStream.event.success("audioFocused");
+        }
     }
 
     @Override
     public void onAudioNoFocus() {
-        audioFocusStream.event.success("audioNoFocus");
+        if (audioFocusStream.event != null) {
+            audioFocusStream.event.success("audioNoFocus");
+        }
+    }
+
+    @Override
+    public void showNotification(Context context, String title, String artist, String clipArt) {
+        if (audioNotificationManager == null) {
+            audioNotificationManager = new AudioNotificationManager(context);
+            audioNotificationManager.setCallback(new AudioNotificationManager.AudioNotificationEventCallback() {
+                @Override
+                public void onReceivePlay() {
+                    if (notificationEventStream.event != null) {
+                        notificationEventStream.event.success("onPlay");
+                    }
+                }
+
+                @Override
+                public void onReceivePause() {
+                    if (notificationEventStream.event != null) {
+                        notificationEventStream.event.success("onPause");
+                    }
+                }
+
+                @Override
+                public void onReceiveSkipToNext() {
+                    if (notificationEventStream.event != null) {
+                        notificationEventStream.event.success("onSkipToNext");
+                    }
+                }
+
+                @Override
+                public void onReceiveSkipToPrevious() {
+                    if (notificationEventStream.event != null) {
+                        notificationEventStream.event.success("onSkipToPrevious");
+                    }
+                }
+
+                @Override
+                public void onReceiveStop() {
+                    if (notificationEventStream.event != null) {
+                        notificationEventStream.event.success("onStop");
+                    }
+                }
+            });
+        }
+        audioNotificationManager.showNotification(new Song(title, artist, clipArt));
+    }
+
+    @Override
+    public void updateNotification(Context context, boolean showPlay,String title, String artist, String clipArt) {
+        if (audioNotificationManager != null) {
+            audioNotificationManager.updateNotification(showPlay, new Song(title, artist, clipArt));
+        }
+    }
+
+    @Override
+    public void cancelNotification(Context context) {
+        if (audioNotificationManager != null) {
+            audioNotificationManager.cancelNotification();
+            audioNotificationManager = null;
+        }
     }
 }

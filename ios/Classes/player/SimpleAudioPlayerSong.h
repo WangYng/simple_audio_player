@@ -9,8 +9,10 @@
 
 @interface SimpleAudioPlayerSong : NSObject
 
-@property(nonatomic, strong)NSURL *source;
+@property(nonatomic, strong) NSString *title;
+@property(nonatomic, strong) NSString *artist;
+@property(nonatomic, strong) NSString *clipArt;
 
-- (instancetype)initWithSource:(NSURL *)source;
+- (instancetype)initWithTitle:(NSString *)title artist:(NSString *)artist clipArt:(NSString *)clipArt;
 
 @end

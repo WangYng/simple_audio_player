@@ -1,8 +1,10 @@
 package io.github.wangyng.simple_audio_player.player
 
+import android.net.Uri
+
 interface PlayerManager {
 
-    fun prepare(song: Song)
+    fun prepare(uri: Uri)
 
     fun play()
 

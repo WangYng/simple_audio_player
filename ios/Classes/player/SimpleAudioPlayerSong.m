@@ -9,11 +9,12 @@
 
 @implementation SimpleAudioPlayerSong
 
-- (instancetype)initWithSource:(NSURL *)source {
-
+- (instancetype)initWithTitle:(NSString *)title artist:(NSString *)artist clipArt:(NSString *)clipArt {
     self = [super init];
     if (self) {
-        _source = source;
+        _title = title;
+        _artist = artist;
+        _clipArt = clipArt;
     }
     return self;
 }

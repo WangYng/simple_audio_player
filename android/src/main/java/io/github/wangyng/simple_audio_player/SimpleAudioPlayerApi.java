@@ -1,7 +1,6 @@
 package io.github.wangyng.simple_audio_player;
 
 import android.content.Context;
-import android.util.Log;
 
 import java.util.HashMap;
 import java.util.List;
@@ -20,6 +19,8 @@ public interface SimpleAudioPlayerApi {
     void setSongStateStream(Context context, SimpleAudioPlayerEventSink songStateStream);
 
     void setAudioFocusStream(Context context, SimpleAudioPlayerEventSink audioFocusStream);
+
+    void setNotificationStream(Context context, SimpleAudioPlayerEventSink notificationStream);
 
     void init(Context context, int playerId);
 
@@ -40,6 +41,12 @@ public interface SimpleAudioPlayerApi {
     boolean tryToGetAudioFocus(Context context);
 
     void giveUpAudioFocus(Context context);
+
+    void showNotification(Context context, String title, String artist, String clipArt);
+
+    void updateNotification(Context context, boolean showPlay, String title, String artist, String clipArt);
+
+    void cancelNotification(Context context);
 
     static void setup(FlutterPlugin.FlutterPluginBinding binding, SimpleAudioPlayerApi api, Context context) {
         BinaryMessenger binaryMessenger = binding.getBinaryMessenger();
@@ -81,6 +88,27 @@ public interface SimpleAudioPlayerApi {
                     }
                 });
                 api.setAudioFocusStream(context, eventSink);
+            } else {
+                eventChannel.setStreamHandler(null);
+            }
+        }
+
+        {
+            EventChannel eventChannel = new EventChannel(binaryMessenger, "io.github.wangyng.simple_audio_player/notificationStream");
+            SimpleAudioPlayerEventSink eventSink = new SimpleAudioPlayerEventSink();
+            if (api != null) {
+                eventChannel.setStreamHandler(new EventChannel.StreamHandler() {
+                    @Override
+                    public void onListen(Object arguments, EventChannel.EventSink events) {
+                        eventSink.event = events;
+                    }
+
+                    @Override
+                    public void onCancel(Object arguments) {
+                        eventSink.event = null;
+                    }
+                });
+                api.setNotificationStream(context, eventSink);
             } else {
                 eventChannel.setStreamHandler(null);
             }
@@ -279,6 +307,69 @@ public interface SimpleAudioPlayerApi {
                     Map<String, Object> wrapped = new HashMap<>();
                     try {
                         api.giveUpAudioFocus(context);
+                        wrapped.put("result", null);
+                    } catch (Exception exception) {
+                        wrapped.put("error", wrapError(exception));
+                    }
+                    reply.reply(wrapped);
+                });
+            } else {
+                channel.setMessageHandler(null);
+            }
+        }
+
+        {
+            BasicMessageChannel<Object> channel = new BasicMessageChannel<>(binaryMessenger, "io.github.wangyng.simple_audio_player.showNotification", new StandardMessageCodec());
+            if (api != null) {
+                channel.setMessageHandler((message, reply) -> {
+                    Map<String, Object> wrapped = new HashMap<>();
+                    try {
+                        HashMap<String, Object> params = (HashMap<String, Object>) message;
+                        String title = (String)params.get("title");
+                        String artist = (String)params.get("artist");
+                        String clipArt = (String)params.get("clipArt");
+                        api.showNotification(context, title, artist, clipArt);
+                        wrapped.put("result", null);
+                    } catch (Exception exception) {
+                        wrapped.put("error", wrapError(exception));
+                    }
+                    reply.reply(wrapped);
+                });
+            } else {
+                channel.setMessageHandler(null);
+            }
+        }
+
+        {
+            BasicMessageChannel<Object> channel = new BasicMessageChannel<>(binaryMessenger, "io.github.wangyng.simple_audio_player.updateNotification", new StandardMessageCodec());
+            if (api != null) {
+                channel.setMessageHandler((message, reply) -> {
+                    Map<String, Object> wrapped = new HashMap<>();
+                    try {
+                        HashMap<String, Object> params = (HashMap<String, Object>) message;
+                        boolean showPlay = (boolean)params.get("showPlay");
+                        String title = (String)params.get("title");
+                        String artist = (String)params.get("artist");
+                        String clipArt = (String)params.get("clipArt");
+                        api.updateNotification(context, showPlay, title, artist, clipArt);
+                        wrapped.put("result", null);
+                    } catch (Exception exception) {
+                        wrapped.put("error", wrapError(exception));
+                    }
+                    reply.reply(wrapped);
+                });
+            } else {
+                channel.setMessageHandler(null);
+            }
+        }
+
+        {
+            BasicMessageChannel<Object> channel = new BasicMessageChannel<>(binaryMessenger, "io.github.wangyng.simple_audio_player.cancelNotification", new StandardMessageCodec());
+            if (api != null) {
+                channel.setMessageHandler((message, reply) -> {
+                    Map<String, Object> wrapped = new HashMap<>();
+                    try {
+                        api.cancelNotification(context);
                         wrapped.put("result", null);
                     } catch (Exception exception) {
                         wrapped.put("error", wrapError(exception));

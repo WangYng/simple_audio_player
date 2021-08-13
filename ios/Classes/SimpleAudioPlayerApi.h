@@ -2,7 +2,7 @@
 //  SimpleAudioPlayerApi.h
 //  Pods
 //
-//  Created by 汪洋 on 2021/8/11.
+//  Created by 汪洋 on 2021/8/13.
 //
 
 #import <Foundation/Foundation.h>
@@ -14,6 +14,8 @@
 - (void)setSongStateStream:(SimpleAudioPlayerEventSink *)songStateStream;
 
 - (void)setAudioFocusStream:(SimpleAudioPlayerEventSink *)audioFocusStream;
+
+- (void)setNotificationStream:(SimpleAudioPlayerEventSink *)notificationStream;
 
 - (void)initWithPlayerId:(NSInteger)playerId;
 
@@ -34,6 +36,12 @@
 - (BOOL)tryToGetAudioFocus;
 
 - (void)giveUpAudioFocus;
+
+- (void)showNotificationWithTitle:(NSString *)title artist:(NSString *)artist clipArt:(NSString *)clipArt;
+
+- (void)updateNotificationWithShowPlay:(BOOL)showPlay title:(NSString *)title artist:(NSString *)artist clipArt:(NSString *)clipArt;
+
+- (void)cancelNotification;
 
 @end
 

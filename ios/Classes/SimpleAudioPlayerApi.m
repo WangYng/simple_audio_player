@@ -2,7 +2,7 @@
 //  SimpleAudioPlayerApi.m
 //  Pods
 //
-//  Created by 汪洋 on 2021/8/11.
+//  Created by 汪洋 on 2021/8/13.
 //
 
 #import "SimpleAudioPlayerApi.h"
@@ -29,7 +29,16 @@
             [api setAudioFocusStream:eventSink];
         }
     }
-    
+
+    {
+        FlutterEventChannel *eventChannel = [FlutterEventChannel eventChannelWithName:@"io.github.wangyng.simple_audio_player/notificationStream" binaryMessenger:messenger];
+        SimpleAudioPlayerEventSink *eventSink = [[SimpleAudioPlayerEventSink alloc] init];
+        if (api != nil) {
+            [eventChannel setStreamHandler:eventSink];
+            [api setNotificationStream:eventSink];
+        }
+    }
+
     {
         FlutterBasicMessageChannel *channel =[FlutterBasicMessageChannel messageChannelWithName:@"io.github.wangyng.simple_audio_player.init" binaryMessenger:messenger];
         if (api != nil) {
@@ -232,7 +241,70 @@
             [channel setMessageHandler:nil];
         }
     }
-    
+
+    {
+        FlutterBasicMessageChannel *channel =[FlutterBasicMessageChannel messageChannelWithName:@"io.github.wangyng.simple_audio_player.showNotification" binaryMessenger:messenger];
+        if (api != nil) {
+            [channel setMessageHandler:^(id  message, FlutterReply reply) {
+                NSMutableDictionary<NSString *, NSObject *> *wrapped = [NSMutableDictionary new];
+                if ([message isKindOfClass:[NSDictionary class]]) {
+                    NSDictionary *params = message;
+                    NSString *title = params[@"title"];
+                    NSString *artist = params[@"artist"];
+                    NSString *clipArt = params[@"clipArt"];
+                    [api showNotificationWithTitle:title artist:artist clipArt:clipArt];
+                    wrapped[@"result"] = nil;
+                } else {
+                    wrapped[@"error"] = @{@"message": @"parse message error"};
+                }
+                reply(wrapped);
+            }];
+        } else {
+            [channel setMessageHandler:nil];
+        }
+    }
+
+    {
+        FlutterBasicMessageChannel *channel =[FlutterBasicMessageChannel messageChannelWithName:@"io.github.wangyng.simple_audio_player.updateNotification" binaryMessenger:messenger];
+        if (api != nil) {
+            [channel setMessageHandler:^(id  message, FlutterReply reply) {
+                NSMutableDictionary<NSString *, NSObject *> *wrapped = [NSMutableDictionary new];
+                if ([message isKindOfClass:[NSDictionary class]]) {
+                    NSDictionary *params = message;
+                    BOOL showPlay = [params[@"showPlay"] boolValue];
+                    NSString *title = params[@"title"];
+                    NSString *artist = params[@"artist"];
+                    NSString *clipArt = params[@"clipArt"];
+                    [api updateNotificationWithShowPlay:showPlay title:title artist:artist clipArt:clipArt];
+                    wrapped[@"result"] = nil;
+                } else {
+                    wrapped[@"error"] = @{@"message": @"parse message error"};
+                }
+                reply(wrapped);
+            }];
+        } else {
+            [channel setMessageHandler:nil];
+        }
+    }
+
+    {
+        FlutterBasicMessageChannel *channel =[FlutterBasicMessageChannel messageChannelWithName:@"io.github.wangyng.simple_audio_player.cancelNotification" binaryMessenger:messenger];
+        if (api != nil) {
+            [channel setMessageHandler:^(id  message, FlutterReply reply) {
+                NSMutableDictionary<NSString *, NSObject *> *wrapped = [NSMutableDictionary new];
+                if ([message isKindOfClass:[NSDictionary class]]) {
+                    [api cancelNotification];
+                    wrapped[@"result"] = nil;
+                } else {
+                    wrapped[@"error"] = @{@"message": @"parse message error"};
+                }
+                reply(wrapped);
+            }];
+        } else {
+            [channel setMessageHandler:nil];
+        }
+    }
+
 }
 
 @end

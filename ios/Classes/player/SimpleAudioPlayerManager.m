@@ -14,7 +14,7 @@
 
 @property(nonatomic, strong) AVPlayerItem *playerItem;
 
-@property(nonatomic, strong) SimpleAudioPlayerSong *currentSong;
+@property(nonatomic, strong) NSURL *currentUrl;
 
 @property(nonatomic, assign) BOOL playWhenReady;
 
@@ -40,14 +40,14 @@
 
 @implementation SimpleAudioPlayerManager
 
-- (void)prepareWithSong:(SimpleAudioPlayerSong *)song {
-    BOOL songHasChanged = self.currentSong == nil || song != self.currentSong;
+- (void)prepareWithUrl:(NSURL *)url {
+    BOOL songHasChanged = self.currentUrl == nil || url != self.currentUrl;
     if (songHasChanged) {
-        self.currentSong = song;
+        self.currentUrl = url;
     }
     
     if (songHasChanged || self.player == nil) {
-        AVPlayerItem *playerItem = [[AVPlayerItem alloc] initWithURL:song.source];
+        AVPlayerItem *playerItem = [[AVPlayerItem alloc] initWithURL:url];
         
         if (self.player == nil) {
             self.player = [[AVPlayer alloc] initWithPlayerItem:playerItem];
