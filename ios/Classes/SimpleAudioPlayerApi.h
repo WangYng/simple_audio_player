@@ -2,7 +2,7 @@
 //  SimpleAudioPlayerApi.h
 //  Pods
 //
-//  Created by 汪洋 on 2021/8/13.
+//  Created by 汪洋 on 2021/8/16.
 //
 
 #import <Foundation/Foundation.h>
@@ -16,6 +16,8 @@
 - (void)setAudioFocusStream:(SimpleAudioPlayerEventSink *)audioFocusStream;
 
 - (void)setNotificationStream:(SimpleAudioPlayerEventSink *)notificationStream;
+
+- (void)setBecomingNoisyStream:(SimpleAudioPlayerEventSink *)becomingNoisyStream;
 
 - (void)initWithPlayerId:(NSInteger)playerId;
 

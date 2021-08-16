@@ -1,20 +1,24 @@
 package io.github.wangyng.simple_audio_player.player
 
+import android.content.BroadcastReceiver
 import android.content.Context
+import android.content.Intent
+import android.content.IntentFilter
 import android.media.AudioManager
 
 class AudioFocusManager(private val context: Context) {
 
     private var mAudioManager: AudioManager? = null
-    private var mCallback: AudioFocusChangeCallback? = null
+    private var mFocusChangeCallback: AudioFocusChangeCallback? = null
+    private var mNoisyAudioStreamReceiver: BroadcastReceiver? = null
 
     private val mOnAudioFocusChangeListener =
         AudioManager.OnAudioFocusChangeListener { focusChange ->
             when (focusChange) {
-                AudioManager.AUDIOFOCUS_GAIN -> mCallback?.onAudioFocused()
+                AudioManager.AUDIOFOCUS_GAIN -> mFocusChangeCallback?.onAudioFocused()
                 AudioManager.AUDIOFOCUS_LOSS_TRANSIENT_CAN_DUCK,
                 AudioManager.AUDIOFOCUS_LOSS_TRANSIENT,
-                AudioManager.AUDIOFOCUS_LOSS -> mCallback?.onAudioNoFocus()
+                AudioManager.AUDIOFOCUS_LOSS -> mFocusChangeCallback?.onAudioNoFocus()
             }
         }
 
@@ -23,7 +27,7 @@ class AudioFocusManager(private val context: Context) {
             context.applicationContext?.getSystemService(Context.AUDIO_SERVICE) as AudioManager
     }
 
-    fun tryToGetAudioFocus(callback: AudioFocusChangeCallback): Boolean {
+    fun tryToGetAudioFocus(focusChangeCallback: AudioFocusChangeCallback): Boolean {
         val result = mAudioManager?.requestAudioFocus(
             mOnAudioFocusChangeListener,
             AudioManager.STREAM_MUSIC,
@@ -31,7 +35,20 @@ class AudioFocusManager(private val context: Context) {
         )
 
         if (result == AudioManager.AUDIOFOCUS_REQUEST_GRANTED) {
-            mCallback = callback
+            this.mFocusChangeCallback = focusChangeCallback
+
+            if (mNoisyAudioStreamReceiver != null) {
+                context.unregisterReceiver(mNoisyAudioStreamReceiver)
+            }
+            mNoisyAudioStreamReceiver = object : BroadcastReceiver() {
+                override fun onReceive(context: Context?, intent: Intent?) {
+                    if (intent?.action == AudioManager.ACTION_AUDIO_BECOMING_NOISY) {
+                        // Pause the playback
+                        mFocusChangeCallback?.onAudioBecomingNoisy()
+                    }
+                }
+            }
+            context.registerReceiver(mNoisyAudioStreamReceiver, IntentFilter(AudioManager.ACTION_AUDIO_BECOMING_NOISY))
         }
 
         return result == AudioManager.AUDIOFOCUS_REQUEST_GRANTED
@@ -39,12 +56,17 @@ class AudioFocusManager(private val context: Context) {
 
     fun giveUpAudioFocus() {
         mAudioManager?.abandonAudioFocus(mOnAudioFocusChangeListener)
-        mCallback = null
+        mFocusChangeCallback = null
+
+        context.unregisterReceiver(mNoisyAudioStreamReceiver)
+        mNoisyAudioStreamReceiver = null
     }
 
     interface AudioFocusChangeCallback {
         fun onAudioFocused()
 
         fun onAudioNoFocus()
+
+        fun onAudioBecomingNoisy()
     }
 }

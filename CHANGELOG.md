@@ -6,3 +6,6 @@ add audio focus manager.
 
 ## 0.0.3
 add audio notification manager.
+
+## 0.0.4
+add observe becoming noisy.

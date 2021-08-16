@@ -23,6 +23,8 @@
 @property(nonatomic, strong) SimpleAudioNotificationManager *notificationManager;
 @property(nonatomic, strong) SimpleAudioPlayerEventSink *notificationStream;
 
+@property(nonatomic, strong) SimpleAudioPlayerEventSink *becomingNoisyStream;
+
 @end
 
 @interface SimpleAudioPlayerStateImpl : NSObject<SimpleAudioPlayerStateDelegate>
@@ -121,6 +123,12 @@
 - (void)onAudioNoFocus {
     if (self.audioFocusStream) {
         self.audioFocusStream.event(@"audioNoFocus");
+    }
+}
+
+- (void)onAudioBecomingNoisy {
+    if (self.becomingNoisyStream) {
+        self.becomingNoisyStream.event(@"becomingNoisy");
     }
 }
 

@@ -14,6 +14,8 @@
     
 - (void)onAudioNoFocus;
 
+- (void)onAudioBecomingNoisy;
+
 @end
 
 @interface SimpleAudioFocusManager : NSObject

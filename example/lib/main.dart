@@ -53,6 +53,9 @@ class _MyAppState extends State<MyApp> {
     focusManager.audioFocusStream.listen((event) {
       print("focus event : $event");
     });
+    focusManager.becomingNoisyStream.listen((event) {
+      print("noisy event : $event");
+    });
     notificationManager.notificationStream.listen((event) {
       print("notification event : $event");
     });

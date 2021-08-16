@@ -27,7 +27,9 @@ public class SimpleAudioPlayerPlugin implements FlutterPlugin, SimpleAudioPlayer
     SimpleAudioPlayerEventSink audioFocusStream;
 
     AudioNotificationManager audioNotificationManager;
-    SimpleAudioPlayerEventSink notificationEventStream;
+    SimpleAudioPlayerEventSink notificationStream;
+
+    SimpleAudioPlayerEventSink becomingNoisyStream;
 
     @Override
     public void onAttachedToEngine(@NonNull FlutterPluginBinding binding) {
@@ -50,8 +52,13 @@ public class SimpleAudioPlayerPlugin implements FlutterPlugin, SimpleAudioPlayer
     }
 
     @Override
-    public void setNotificationEventStream(Context context, SimpleAudioPlayerEventSink notificationEventStream) {
-        this.notificationEventStream = notificationEventStream;
+    public void setNotificationStream(Context context, SimpleAudioPlayerEventSink notificationStream) {
+        this.notificationStream = notificationStream;
+    }
+
+    @Override
+    public void setBecomingNoisyStream(Context context, SimpleAudioPlayerEventSink becomingNoisyStream) {
+        this.becomingNoisyStream = becomingNoisyStream;
     }
 
     @Override
@@ -176,42 +183,49 @@ public class SimpleAudioPlayerPlugin implements FlutterPlugin, SimpleAudioPlayer
     }
 
     @Override
+    public void onAudioBecomingNoisy() {
+        if (becomingNoisyStream.event != null) {
+            becomingNoisyStream.event.success("becomingNoisy");
+        }
+    }
+
+    @Override
     public void showNotification(Context context, String title, String artist, String clipArt) {
         if (audioNotificationManager == null) {
             audioNotificationManager = new AudioNotificationManager(context);
             audioNotificationManager.setCallback(new AudioNotificationManager.AudioNotificationEventCallback() {
                 @Override
                 public void onReceivePlay() {
-                    if (notificationEventStream.event != null) {
-                        notificationEventStream.event.success("onPlay");
+                    if (notificationStream.event != null) {
+                        notificationStream.event.success("onPlay");
                     }
                 }
 
                 @Override
                 public void onReceivePause() {
-                    if (notificationEventStream.event != null) {
-                        notificationEventStream.event.success("onPause");
+                    if (notificationStream.event != null) {
+                        notificationStream.event.success("onPause");
                     }
                 }
 
                 @Override
                 public void onReceiveSkipToNext() {
-                    if (notificationEventStream.event != null) {
-                        notificationEventStream.event.success("onSkipToNext");
+                    if (notificationStream.event != null) {
+                        notificationStream.event.success("onSkipToNext");
                     }
                 }
 
                 @Override
                 public void onReceiveSkipToPrevious() {
-                    if (notificationEventStream.event != null) {
-                        notificationEventStream.event.success("onSkipToPrevious");
+                    if (notificationStream.event != null) {
+                        notificationStream.event.success("onSkipToPrevious");
                     }
                 }
 
                 @Override
                 public void onReceiveStop() {
-                    if (notificationEventStream.event != null) {
-                        notificationEventStream.event.success("onStop");
+                    if (notificationStream.event != null) {
+                        notificationStream.event.success("onStop");
                     }
                 }
             });

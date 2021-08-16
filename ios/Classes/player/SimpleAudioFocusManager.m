@@ -12,6 +12,8 @@
 
 @property (nonatomic, strong) id interruptionObserverToken;
 
+@property (nonatomic, strong) id routeChangeObserverToken;
+
 @end
 
 @implementation SimpleAudioFocusManager
@@ -27,6 +29,7 @@
     
     if (self.delegate) {
         [self observeAudioFocusChange];
+        [self observeAudioRouteChange];
     }
     return YES;
 }
@@ -54,11 +57,30 @@
     }];
 }
 
+- (void)observeAudioRouteChange {
+    __weak typeof(self) ws = self;
+    if (self.routeChangeObserverToken) {
+        [NSNotificationCenter.defaultCenter removeObserver:self.routeChangeObserverToken];
+    }
+    self.routeChangeObserverToken = [NSNotificationCenter.defaultCenter addObserverForName:AVAudioSessionRouteChangeNotification object:nil queue:nil usingBlock:^(NSNotification * _Nonnull note) {
+        if (note && note.userInfo) {
+            NSInteger routeChangeReason = [[note.userInfo valueForKey:AVAudioSessionRouteChangeReasonKey] integerValue];
+            if (routeChangeReason == AVAudioSessionRouteChangeReasonOldDeviceUnavailable) {
+                [ws.delegate onAudioBecomingNoisy];
+            }
+        }
+    }];
+}
+
 - (void) giveUpAudioFocus {
     [AVAudioSession.sharedInstance setActive:false error:nil];
     if (self.interruptionObserverToken) {
         [NSNotificationCenter.defaultCenter removeObserver:self.interruptionObserverToken];
         self.interruptionObserverToken = nil;
+    }
+    if (self.routeChangeObserverToken) {
+        [NSNotificationCenter.defaultCenter removeObserver:self.routeChangeObserverToken];
+        self.routeChangeObserverToken = nil;
     }
 }
 

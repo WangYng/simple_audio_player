@@ -9,6 +9,7 @@
 #import "SimpleAudioPlayerSong.h"
 
 @protocol SimpleAudioNotificationDelegate <NSObject>
+@required
 
 - (void)onReceivePlay;
 

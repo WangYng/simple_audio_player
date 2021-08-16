@@ -2,7 +2,7 @@
 //  SimpleAudioPlayerApi.m
 //  Pods
 //
-//  Created by 汪洋 on 2021/8/13.
+//  Created by 汪洋 on 2021/8/16.
 //
 
 #import "SimpleAudioPlayerApi.h"
@@ -11,7 +11,7 @@
 
 + (void)setup:(NSObject<FlutterPluginRegistrar> *)registrar api:(id<SimpleAudioPlayerApiDelegate>)api {
     NSObject<FlutterBinaryMessenger> *messenger = [registrar messenger];
-    
+
     {
         FlutterEventChannel *eventChannel = [FlutterEventChannel eventChannelWithName:@"io.github.wangyng.simple_audio_player/songStateStream" binaryMessenger:messenger];
         SimpleAudioPlayerEventSink *eventSink = [[SimpleAudioPlayerEventSink alloc] init];
@@ -20,7 +20,7 @@
             [api setSongStateStream:eventSink];
         }
     }
-    
+
     {
         FlutterEventChannel *eventChannel = [FlutterEventChannel eventChannelWithName:@"io.github.wangyng.simple_audio_player/audioFocusStream" binaryMessenger:messenger];
         SimpleAudioPlayerEventSink *eventSink = [[SimpleAudioPlayerEventSink alloc] init];
@@ -36,6 +36,15 @@
         if (api != nil) {
             [eventChannel setStreamHandler:eventSink];
             [api setNotificationStream:eventSink];
+        }
+    }
+
+    {
+        FlutterEventChannel *eventChannel = [FlutterEventChannel eventChannelWithName:@"io.github.wangyng.simple_audio_player/becomingNoisyStream" binaryMessenger:messenger];
+        SimpleAudioPlayerEventSink *eventSink = [[SimpleAudioPlayerEventSink alloc] init];
+        if (api != nil) {
+            [eventChannel setStreamHandler:eventSink];
+            [api setBecomingNoisyStream:eventSink];
         }
     }
 
@@ -58,7 +67,7 @@
             [channel setMessageHandler:nil];
         }
     }
-    
+
     {
         FlutterBasicMessageChannel *channel =[FlutterBasicMessageChannel messageChannelWithName:@"io.github.wangyng.simple_audio_player.prepare" binaryMessenger:messenger];
         if (api != nil) {
@@ -84,7 +93,7 @@
             [channel setMessageHandler:nil];
         }
     }
-    
+
     {
         FlutterBasicMessageChannel *channel =[FlutterBasicMessageChannel messageChannelWithName:@"io.github.wangyng.simple_audio_player.play" binaryMessenger:messenger];
         if (api != nil) {
@@ -104,7 +113,7 @@
             [channel setMessageHandler:nil];
         }
     }
-    
+
     {
         FlutterBasicMessageChannel *channel =[FlutterBasicMessageChannel messageChannelWithName:@"io.github.wangyng.simple_audio_player.pause" binaryMessenger:messenger];
         if (api != nil) {
@@ -124,7 +133,7 @@
             [channel setMessageHandler:nil];
         }
     }
-    
+
     {
         FlutterBasicMessageChannel *channel =[FlutterBasicMessageChannel messageChannelWithName:@"io.github.wangyng.simple_audio_player.stop" binaryMessenger:messenger];
         if (api != nil) {
@@ -144,7 +153,7 @@
             [channel setMessageHandler:nil];
         }
     }
-    
+
     {
         FlutterBasicMessageChannel *channel =[FlutterBasicMessageChannel messageChannelWithName:@"io.github.wangyng.simple_audio_player.seekTo" binaryMessenger:messenger];
         if (api != nil) {
@@ -165,7 +174,7 @@
             [channel setMessageHandler:nil];
         }
     }
-    
+
     {
         FlutterBasicMessageChannel *channel =[FlutterBasicMessageChannel messageChannelWithName:@"io.github.wangyng.simple_audio_player.getCurrentPosition" binaryMessenger:messenger];
         if (api != nil) {
@@ -185,7 +194,7 @@
             [channel setMessageHandler:nil];
         }
     }
-    
+
     {
         FlutterBasicMessageChannel *channel =[FlutterBasicMessageChannel messageChannelWithName:@"io.github.wangyng.simple_audio_player.getDuration" binaryMessenger:messenger];
         if (api != nil) {
@@ -205,7 +214,7 @@
             [channel setMessageHandler:nil];
         }
     }
-    
+
     {
         FlutterBasicMessageChannel *channel =[FlutterBasicMessageChannel messageChannelWithName:@"io.github.wangyng.simple_audio_player.tryToGetAudioFocus" binaryMessenger:messenger];
         if (api != nil) {
@@ -223,7 +232,7 @@
             [channel setMessageHandler:nil];
         }
     }
-    
+
     {
         FlutterBasicMessageChannel *channel =[FlutterBasicMessageChannel messageChannelWithName:@"io.github.wangyng.simple_audio_player.giveUpAudioFocus" binaryMessenger:messenger];
         if (api != nil) {

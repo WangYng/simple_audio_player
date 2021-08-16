@@ -22,6 +22,8 @@ public interface SimpleAudioPlayerApi {
 
     void setNotificationStream(Context context, SimpleAudioPlayerEventSink notificationStream);
 
+    void setBecomingNoisyStream(Context context, SimpleAudioPlayerEventSink becomingNoisyStream);
+
     void init(Context context, int playerId);
 
     void prepare(Context context, int playerId, String uri);
@@ -109,6 +111,27 @@ public interface SimpleAudioPlayerApi {
                     }
                 });
                 api.setNotificationStream(context, eventSink);
+            } else {
+                eventChannel.setStreamHandler(null);
+            }
+        }
+
+        {
+            EventChannel eventChannel = new EventChannel(binaryMessenger, "io.github.wangyng.simple_audio_player/becomingNoisyStream");
+            SimpleAudioPlayerEventSink eventSink = new SimpleAudioPlayerEventSink();
+            if (api != null) {
+                eventChannel.setStreamHandler(new EventChannel.StreamHandler() {
+                    @Override
+                    public void onListen(Object arguments, EventChannel.EventSink events) {
+                        eventSink.event = events;
+                    }
+
+                    @Override
+                    public void onCancel(Object arguments) {
+                        eventSink.event = null;
+                    }
+                });
+                api.setBecomingNoisyStream(context, eventSink);
             } else {
                 eventChannel.setStreamHandler(null);
             }

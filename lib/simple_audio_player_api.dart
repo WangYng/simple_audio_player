@@ -10,6 +10,8 @@ class SimpleAudioPlayerApi {
 
   static Stream notificationStream = EventChannel("io.github.wangyng.simple_audio_player/notificationStream").receiveBroadcastStream();
 
+  static Stream becomingNoisyStream = EventChannel("io.github.wangyng.simple_audio_player/becomingNoisyStream").receiveBroadcastStream();
+
   static Future<void> init({required int playerId}) async {
     const channel = BasicMessageChannel<dynamic>('io.github.wangyng.simple_audio_player.init', StandardMessageCodec());
 

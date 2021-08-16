@@ -8,7 +8,7 @@ A simple audio player for Flutter.
 
 ```yaml
 dependencies:
-  simple_audio_player: ^0.0.3
+  simple_audio_player: ^0.0.4
 ```
 
 2. Install it
@@ -28,8 +28,14 @@ $ flutter packages get
     simpleAudioPlayer.songStateStream.listen((event) {
       print("song event : $event");
     });
-    SimpleAudioFocusManager().audioFocusStream.listen((event) {
+    focusManager.audioFocusStream.listen((event) {
       print("focus event : $event");
+    });
+    focusManager.becomingNoisyStream.listen((event) {
+      print("becoming noisy event : $event");
+    });
+    notificationManager.notificationStream.listen((event) {
+      print("notification event : $event");
     });
   }
 
@@ -94,3 +100,4 @@ $ flutter packages get
 - [x] play local mp3 file
 - [x] play assets mp3 file
 - [x] audio notification manager
+- [x] observe becoming noisy

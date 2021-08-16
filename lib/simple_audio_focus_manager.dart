@@ -10,6 +10,8 @@ class SimpleAudioFocusManager {
 
   Stream audioFocusStream = SimpleAudioPlayerApi.audioFocusStream;
 
+  Stream becomingNoisyStream = SimpleAudioPlayerApi.becomingNoisyStream;
+
   Future<bool> tryToGetAudioFocus() async {
     return SimpleAudioPlayerApi.tryToGetAudioFocus();
   }
