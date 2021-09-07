@@ -11,6 +11,11 @@ class SimpleAudioPlayerSongStateEvent {
   dynamic data;
 
   SimpleAudioPlayerSongStateEvent(this.state, {this.data});
+
+  @override
+  String toString() {
+    return 'SimpleAudioPlayerSongStateEvent{state: $state, data: $data}';
+  }
 }
 
 class SimpleAudioPlayer {
