@@ -1,14 +1,35 @@
 import 'package:simple_audio_player/simple_audio_player_api.dart';
 
-class SimpleAudioNotificationManager {
+enum SimpleAudioNotificationState {
+  onPlay,
+  onPause,
+  onSkipToNext,
+  onSkipToPrevious,
+  onStop,
+}
 
+class SimpleAudioNotificationManager {
   static SimpleAudioNotificationManager? _instance;
 
   SimpleAudioNotificationManager._internal();
 
   factory SimpleAudioNotificationManager() => _instance ?? SimpleAudioNotificationManager._internal();
 
-  Stream notificationStream = SimpleAudioPlayerApi.notificationStream;
+  Stream<SimpleAudioNotificationState> notificationStream = SimpleAudioPlayerApi.notificationStream.map((event) {
+    if (event == "onPlay") {
+      return SimpleAudioNotificationState.onPlay;
+    } else if (event == "onPause") {
+      return SimpleAudioNotificationState.onPause;
+    } else if (event == "onSkipToNext") {
+      return SimpleAudioNotificationState.onSkipToNext;
+    } else if (event == "onSkipToPrevious") {
+      return SimpleAudioNotificationState.onSkipToPrevious;
+    } else if (event == "onStop") {
+      return SimpleAudioNotificationState.onStop;
+    } else {
+      return SimpleAudioNotificationState.onStop;
+    }
+  });
 
   Future<void> showNotification({required String title, required String artist, required String clipArt}) {
     return SimpleAudioPlayerApi.showNotification(title: title, artist: artist, clipArt: clipArt);

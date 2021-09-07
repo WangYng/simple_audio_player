@@ -9,3 +9,6 @@ add audio notification manager.
 
 ## 0.0.4
 add observe becoming noisy.
+
+## 0.0.5
+fix some issues.

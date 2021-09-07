@@ -2,13 +2,24 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:simple_audio_player/simple_audio_player_api.dart';
 
+enum SimpleAudioPlayerSongState {
+  onReady, onPlayEnd, onError, onPositionChange
+}
+
+class SimpleAudioPlayerSongStateEvent {
+  final SimpleAudioPlayerSongState state;
+  dynamic data;
+
+  SimpleAudioPlayerSongStateEvent(this.state, {this.data});
+}
+
 class SimpleAudioPlayer {
 
   static int _firstPlayerId = 1;
 
   final int playerId = _firstPlayerId++;
 
-  late Stream songStateStream;
+  late Stream<SimpleAudioPlayerSongStateEvent> songStateStream;
 
   SimpleAudioPlayer() {
     SimpleAudioPlayerApi.init(playerId: playerId);
@@ -18,6 +29,18 @@ class SimpleAudioPlayer {
         return playerId == this.playerId;
       }
       return false;
+    }).map<SimpleAudioPlayerSongStateEvent>((event) {
+      if (event["event"] == "onReady") {
+        return SimpleAudioPlayerSongStateEvent(SimpleAudioPlayerSongState.onReady);
+      } else if (event["event"] == "onPlayEnd") {
+        return SimpleAudioPlayerSongStateEvent(SimpleAudioPlayerSongState.onPlayEnd);
+      } else if (event["event"] == "onPositionChange") {
+        return SimpleAudioPlayerSongStateEvent(SimpleAudioPlayerSongState.onPositionChange, data: event["data"]);
+      } else if (event["event"] == "onError") {
+        return SimpleAudioPlayerSongStateEvent(SimpleAudioPlayerSongState.onError, data: event["data"]);
+      } else {
+        return SimpleAudioPlayerSongStateEvent(SimpleAudioPlayerSongState.onError, data: event["data"]);
+      }
     });
   }
 
