@@ -2,9 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:simple_audio_player/simple_audio_player_api.dart';
 
-enum SimpleAudioPlayerSongState {
-  onReady, onPlayEnd, onError, onPositionChange
-}
+enum SimpleAudioPlayerSongState { onReady, onPlayEnd, onError, onPositionChange }
 
 class SimpleAudioPlayerSongStateEvent {
   final SimpleAudioPlayerSongState state;
@@ -19,7 +17,6 @@ class SimpleAudioPlayerSongStateEvent {
 }
 
 class SimpleAudioPlayer {
-
   static int _firstPlayerId = 1;
 
   final int playerId = _firstPlayerId++;
@@ -36,7 +33,7 @@ class SimpleAudioPlayer {
       return false;
     }).map<SimpleAudioPlayerSongStateEvent>((event) {
       if (event["event"] == "onReady") {
-        return SimpleAudioPlayerSongStateEvent(SimpleAudioPlayerSongState.onReady);
+        return SimpleAudioPlayerSongStateEvent(SimpleAudioPlayerSongState.onReady, data: event["data"]);
       } else if (event["event"] == "onPlayEnd") {
         return SimpleAudioPlayerSongStateEvent(SimpleAudioPlayerSongState.onPlayEnd);
       } else if (event["event"] == "onPositionChange") {
@@ -77,4 +74,3 @@ class SimpleAudioPlayer {
     return SimpleAudioPlayerApi.getDuration(playerId: playerId);
   }
 }
-

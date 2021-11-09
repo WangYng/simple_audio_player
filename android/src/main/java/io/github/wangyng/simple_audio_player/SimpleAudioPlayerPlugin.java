@@ -71,6 +71,7 @@ public class SimpleAudioPlayerPlugin implements FlutterPlugin, SimpleAudioPlayer
                     Map<String, Object> result = new HashMap<>();
                     result.put("playerId", playerId);
                     result.put("event", "onReady");
+                    result.put("data", new long[]{player.getCurrentPosition(), player.getDuration()});
                     songStateStream.event.success(result);
                 }
             }
@@ -234,7 +235,7 @@ public class SimpleAudioPlayerPlugin implements FlutterPlugin, SimpleAudioPlayer
     }
 
     @Override
-    public void updateNotification(Context context, boolean showPlay,String title, String artist, String clipArt) {
+    public void updateNotification(Context context, boolean showPlay, String title, String artist, String clipArt) {
         if (audioNotificationManager != null) {
             audioNotificationManager.updateNotification(showPlay, new Song(title, artist, clipArt));
         }

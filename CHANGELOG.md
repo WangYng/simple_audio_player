@@ -12,3 +12,6 @@ add observe becoming noisy.
 
 ## 0.0.5
 fix some issues.
+
+## 0.0.6
+fix some issues.

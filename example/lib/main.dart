@@ -33,11 +33,11 @@ class _MyAppState extends State<MyApp> {
 
     // copy file
     Future.microtask(() async {
-      File file = File("${(await getTemporaryDirectory()).path}/audios/01.mp3");
+      File file = File("${(await getTemporaryDirectory()).path}/audios/02.mp3");
 
       if (!file.existsSync()) {
         file.createSync(recursive: true);
-        final byteData = await rootBundle.load("audios/01.mp3");
+        final byteData = await rootBundle.load("audios/02.mp3");
         await file.writeAsBytes(byteData.buffer.asUint8List());
       }
 
@@ -102,7 +102,7 @@ class _MyAppState extends State<MyApp> {
                         "prepare\nasset",
                         textAlign: TextAlign.center,
                       ),
-                      onPressed: () => simpleAudioPlayer.prepare(uri: "asset:///audios/01.mp3"),
+                      onPressed: () => simpleAudioPlayer.prepare(uri: "asset:///audios/02.mp3"),
                     ),
                     CupertinoButton(
                       child: Text(
