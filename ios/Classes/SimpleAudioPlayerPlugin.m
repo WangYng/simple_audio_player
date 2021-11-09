@@ -184,11 +184,12 @@
 
 @implementation SimpleAudioPlayerStateImpl
 
-- (void)onReady {
+- (void)onReadyWithDuration:(NSInteger)duration; {
     if (self.plugin.songStateStream.event) {
         NSMutableDictionary *result = [[NSMutableDictionary alloc] init];
         result[@"playerId"] = @(self.playerId);
         result[@"event"] = @"onReady";
+        result[@"data"] = @(duration);
         self.plugin.songStateStream.event(result);
     }
 }

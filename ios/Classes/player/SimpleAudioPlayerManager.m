@@ -144,7 +144,7 @@
 }
 
 - (void)onReady {
-    [self.delegate onReady];
+    [self.delegate onReadyWithDuration:self.duration];
 }
 
 - (void)onErrorWithMessage:(NSString *)message {

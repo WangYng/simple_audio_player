@@ -10,7 +10,7 @@
 @protocol SimpleAudioPlayerStateDelegate <NSObject>
 @required
 
-- (void)onReady;
+- (void)onReadyWithDuration:(NSInteger)duration;
 
 - (void)onPlayEnd;
 

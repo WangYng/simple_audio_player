@@ -71,7 +71,7 @@ public class SimpleAudioPlayerPlugin implements FlutterPlugin, SimpleAudioPlayer
                     Map<String, Object> result = new HashMap<>();
                     result.put("playerId", playerId);
                     result.put("event", "onReady");
-                    result.put("data", new long[]{player.getCurrentPosition(), player.getDuration()});
+                    result.put("data", player.getDuration());
                     songStateStream.event.success(result);
                 }
             }
