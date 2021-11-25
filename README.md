@@ -8,7 +8,7 @@ A simple audio player for Flutter.
 
 ```yaml
 dependencies:
-  simple_audio_player: ^0.0.7
+  simple_audio_player: ^0.0.8
 ```
 
 2. Install it

@@ -57,6 +57,32 @@
 }
 
 - (void)cancelNotification {
+    if (self.playingCenter != nil) {
+        [self.playingCenter setNowPlayingInfo:@{}];
+    }
+    if (self.remoteCommandCenter != nil) {
+        {
+            MPRemoteCommand *command = self.remoteCommandCenter.nextTrackCommand;
+            [command removeTarget:self action:@selector(skipToNextEvent:)];
+        }
+        {
+            MPRemoteCommand *command = self.remoteCommandCenter.previousTrackCommand;
+            [command removeTarget:self action:@selector(skipToPreviousEvent:)];
+        }
+        {
+            MPRemoteCommand *command = self.remoteCommandCenter.playCommand;
+            [command removeTarget:self action:@selector(playEvent:)];
+        }
+        {
+            MPRemoteCommand *command = self.remoteCommandCenter.pauseCommand;
+            [command removeTarget:self action:@selector(pauseEvent:)];
+        }
+        {
+            MPRemoteCommand *command = self.remoteCommandCenter.stopCommand;
+            [command removeTarget:self action:@selector(stopEvent:)];
+        }
+    }
+
     self.playingCenter = nil;
     self.remoteCommandCenter = nil;
     
