@@ -5,12 +5,9 @@ import android.net.Uri
 import android.os.Handler
 import android.os.Looper
 import android.os.Message
+import com.google.android.exoplayer2.*
 import com.google.android.exoplayer2.C.CONTENT_TYPE_MUSIC
 import com.google.android.exoplayer2.C.USAGE_MEDIA
-import com.google.android.exoplayer2.ExoPlaybackException
-import com.google.android.exoplayer2.MediaItem
-import com.google.android.exoplayer2.Player
-import com.google.android.exoplayer2.SimpleExoPlayer
 import com.google.android.exoplayer2.audio.AudioAttributes
 import com.google.android.exoplayer2.source.ProgressiveMediaSource
 import com.google.android.exoplayer2.upstream.DataSource
@@ -133,14 +130,8 @@ class ExoPlayerManager(private val context: Context) : PlayerManager {
             }
         }
 
-        override fun onPlayerError(error: ExoPlaybackException) {
-            val what: String = when (error.type) {
-                ExoPlaybackException.TYPE_SOURCE -> error.sourceException.message ?: ""
-                ExoPlaybackException.TYPE_RENDERER -> error.rendererException.message ?: ""
-                ExoPlaybackException.TYPE_UNEXPECTED -> error.unexpectedException.message ?: ""
-                else -> "onPlayerError: $error"
-            }
-            mExoSongStateCallback?.onError(what)
+        override fun onPlayerError(error: PlaybackException) {
+            mExoSongStateCallback?.onError(error.message ?: "onPlayerError")
             stop()
         }
     }
