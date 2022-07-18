@@ -22,6 +22,7 @@ class _MyAppState extends State<MyApp> {
   final focusManager = SimpleAudioFocusManager();
   final notificationManager = SimpleAudioNotificationManager();
 
+  double volumeValue = 1.0;
 
   double sliderValue = 0;
 
@@ -125,6 +126,19 @@ class _MyAppState extends State<MyApp> {
                   child: Text("stop"),
                   onPressed: () => simpleAudioPlayer.stop(),
                 ),
+                Text("volumn"),
+                CupertinoSlider(
+                  value: volumeValue,
+                  onChanged: (changeValue) {
+                    setState(() {
+                      volumeValue = changeValue;
+                    });
+                  },
+                  onChangeEnd: (changeValue) async {
+                    simpleAudioPlayer.setVolume(volume: changeValue);
+                  },
+                ),
+                Text("progress"),
                 CupertinoSlider(
                   value: sliderValue,
                   onChanged: (changeValue) {

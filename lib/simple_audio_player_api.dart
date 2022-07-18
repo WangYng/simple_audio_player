@@ -140,6 +140,28 @@ class SimpleAudioPlayerApi {
     }
   }
 
+  static Future<void> setVolume({required int playerId, required double volume}) async {
+    const channel = BasicMessageChannel<dynamic>('io.github.wangyng.simple_audio_player.setVolume', StandardMessageCodec());
+
+    final Map<String, dynamic> requestMap = {};
+    requestMap["playerId"] = playerId;
+    requestMap["volume"] = volume;
+    final reply = await channel.send(requestMap);
+
+    if (!(reply is Map)) {
+      _throwChannelException();
+    }
+
+    final replyMap = Map<String, dynamic>.from(reply);
+    if (replyMap['error'] != null) {
+      final error = Map<String, dynamic>.from(replyMap['error']);
+      _throwException(error);
+
+    } else {
+      // noop
+    }
+  }
+
   static Future<int> getCurrentPosition({required int playerId}) async {
     const channel = BasicMessageChannel<dynamic>('io.github.wangyng.simple_audio_player.getCurrentPosition', StandardMessageCodec());
 

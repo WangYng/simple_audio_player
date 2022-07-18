@@ -31,6 +31,8 @@
 
 - (void)seekToWithPlayerId:(NSInteger)playerId position:(NSInteger)position;
 
+- (void)setVolumeWithPlayerId:(NSInteger)playerId volume:(double)volume;
+
 - (NSInteger)getCurrentPositionWithPlayerId:(NSInteger)playerId;
 
 - (NSInteger)getDurationWithPlayerId:(NSInteger)playerId;

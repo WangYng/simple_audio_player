@@ -29,7 +29,6 @@
 
 @property (nonatomic, assign, readonly) NSInteger duration;
 
- 
 - (void)prepareWithUrl:(NSURL *)url;
 
 - (void)play;
@@ -39,6 +38,8 @@
 - (void)stop;
 
 - (void)seekToWithPosition:(NSInteger)position;
+
+- (void)setVolume:(double)volume;
 
 @end
 

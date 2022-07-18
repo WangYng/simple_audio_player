@@ -103,6 +103,10 @@ class ExoPlayerManager(private val context: Context) : PlayerManager {
         mExoPlayer?.seekTo(position)
     }
 
+    override fun setVolume(volume: Double) {
+        mExoPlayer?.volume = volume.toFloat();
+    }
+
     // ---------- utility ----------
     private fun buildDataSourceFactory(context: Context): DataSource.Factory {
         val bandwidthMeter = DefaultBandwidthMeter.Builder(context).build()

@@ -36,6 +36,8 @@ public interface SimpleAudioPlayerApi {
 
     void seekTo(Context context, int playerId, Long position);
 
+    void setVolume(Context context, int playerId, Double volume);
+
     Long getCurrentPosition(Context context, int playerId);
 
     Long getDuration(Context context, int playerId);
@@ -254,6 +256,27 @@ public interface SimpleAudioPlayerApi {
                         int playerId = (int) params.get("playerId");
                         Long position = (long) (int) params.get("position");
                         api.seekTo(context, playerId, position);
+                        wrapped.put("result", null);
+                    } catch (Exception exception) {
+                        wrapped.put("error", wrapError(exception));
+                    }
+                    reply.reply(wrapped);
+                });
+            } else {
+                channel.setMessageHandler(null);
+            }
+        }
+
+        {
+            BasicMessageChannel<Object> channel = new BasicMessageChannel<>(binaryMessenger, "io.github.wangyng.simple_audio_player.setVolume", new StandardMessageCodec());
+            if (api != null) {
+                channel.setMessageHandler((message, reply) -> {
+                    Map<String, Object> wrapped = new HashMap<>();
+                    try {
+                        HashMap<String, Object> params = (HashMap<String, Object>) message;
+                        int playerId = (int) params.get("playerId");
+                        double volume = (double) params.get("volume");
+                        api.setVolume(context, playerId, volume);
                         wrapped.put("result", null);
                     } catch (Exception exception) {
                         wrapped.put("error", wrapError(exception));

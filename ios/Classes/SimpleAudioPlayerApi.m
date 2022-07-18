@@ -174,6 +174,27 @@
             [channel setMessageHandler:nil];
         }
     }
+    
+    {
+        FlutterBasicMessageChannel *channel =[FlutterBasicMessageChannel messageChannelWithName:@"io.github.wangyng.simple_audio_player.setVolume" binaryMessenger:messenger];
+        if (api != nil) {
+            [channel setMessageHandler:^(id  message, FlutterReply reply) {
+                NSMutableDictionary<NSString *, NSObject *> *wrapped = [NSMutableDictionary new];
+                if ([message isKindOfClass:[NSDictionary class]]) {
+                    NSDictionary *params = message;
+                    NSInteger playerId = [params[@"playerId"] integerValue];
+                    double volume = [params[@"volume"] doubleValue];
+                    [api setVolumeWithPlayerId:playerId volume:volume];
+                    wrapped[@"result"] = nil;
+                } else {
+                    wrapped[@"error"] = @{@"message": @"parse message error"};
+                }
+                reply(wrapped);
+            }];
+        } else {
+            [channel setMessageHandler:nil];
+        }
+    }
 
     {
         FlutterBasicMessageChannel *channel =[FlutterBasicMessageChannel messageChannelWithName:@"io.github.wangyng.simple_audio_player.getCurrentPosition" binaryMessenger:messenger];

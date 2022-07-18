@@ -92,6 +92,11 @@
     [player seekToWithPosition:position];
 }
 
+- (void)setVolumeWithPlayerId:(NSInteger)playerId volume:(double)volume {
+    SimpleAudioPlayerManager *player = self.playerManagerMap[@(playerId)];
+    [player setVolume:volume];
+}
+
 - (NSInteger)getCurrentPositionWithPlayerId:(NSInteger)playerId {
     SimpleAudioPlayerManager *player = self.playerManagerMap[@(playerId)];
     return player.currentPosition;

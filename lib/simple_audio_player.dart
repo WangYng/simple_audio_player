@@ -66,6 +66,10 @@ class SimpleAudioPlayer {
     return SimpleAudioPlayerApi.seekTo(playerId: playerId, position: position);
   }
 
+  Future<void> setVolume({required double volume}) async {
+    return SimpleAudioPlayerApi.setVolume(playerId: playerId, volume: volume);
+  }
+
   Future<int> getCurrentPosition() async {
     return SimpleAudioPlayerApi.getCurrentPosition(playerId: playerId);
   }

@@ -97,6 +97,14 @@
     }
 }
 
+- (void)setVolume:(double)volume {
+    if (self.player == nil) {
+        return;
+    } else {
+        self.player.volume = volume;
+    }
+}
+
 @end
 
 
