@@ -16,7 +16,7 @@ class SimpleAudioFocusManager {
       SimpleAudioPlayerApi.audioFocusStream.map<SimpleAudioFocusState>((event) {
     if (event == "audioFocused") {
       return SimpleAudioFocusState.audioFocused;
-    } else if (event == "audioFocused") {
+    } else if (event == "audioNoFocus") {
       return SimpleAudioFocusState.audioNoFocus;
     } else {
       return SimpleAudioFocusState.audioNoFocus;

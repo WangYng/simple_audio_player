@@ -30,3 +30,6 @@ fix some issues.
 
 ## 0.1.1
 set volume.
+
+## 0.1.2
+fix some issues.
