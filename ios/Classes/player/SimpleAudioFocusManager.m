@@ -73,10 +73,6 @@
 }
 
 - (void) giveUpAudioFocus {
-    if (self.interruptionObserverToken && self.routeChangeObserverToken) {
-        [AVAudioSession.sharedInstance setActive:false error:nil];
-    }
-    
     if (self.interruptionObserverToken) {
         [NSNotificationCenter.defaultCenter removeObserver:self.interruptionObserverToken];
         self.interruptionObserverToken = nil;
