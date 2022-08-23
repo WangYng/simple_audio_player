@@ -120,19 +120,19 @@
 }
 
 - (void)onAudioFocused {
-    if (self.audioFocusStream) {
+    if (self.audioFocusStream.event) {
         self.audioFocusStream.event(@"audioFocused");
     }
 }
 
 - (void)onAudioNoFocus {
-    if (self.audioFocusStream) {
+    if (self.audioFocusStream.event) {
         self.audioFocusStream.event(@"audioNoFocus");
     }
 }
 
 - (void)onAudioBecomingNoisy {
-    if (self.becomingNoisyStream) {
+    if (self.becomingNoisyStream.event) {
         self.becomingNoisyStream.event(@"becomingNoisy");
     }
 }
@@ -156,31 +156,31 @@
 }
 
 - (void)onReceivePause {
-    if (self.notificationStream) {
+    if (self.notificationStream.event) {
         self.notificationStream.event(@"onPause");
     }
 }
 
 - (void)onReceivePlay {
-    if (self.notificationStream) {
+    if (self.notificationStream.event) {
         self.notificationStream.event(@"onPlay");
     }
 }
 
 - (void)onReceiveSkipToNext {
-    if (self.notificationStream) {
+    if (self.notificationStream.event) {
         self.notificationStream.event(@"onSkipToNext");
     }
 }
 
 - (void)onReceiveSkipToPrevious {
-    if (self.notificationStream) {
+    if (self.notificationStream.event) {
         self.notificationStream.event(@"onSkipToPrevious");
     }
 }
 
 - (void)onReceiveStop {
-    if (self.notificationStream) {
+    if (self.notificationStream.event) {
         self.notificationStream.event(@"onStop");
     }
 }

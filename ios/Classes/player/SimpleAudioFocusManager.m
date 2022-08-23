@@ -73,7 +73,10 @@
 }
 
 - (void) giveUpAudioFocus {
-    [AVAudioSession.sharedInstance setActive:false error:nil];
+    if (self.interruptionObserverToken && self.routeChangeObserverToken) {
+        [AVAudioSession.sharedInstance setActive:false error:nil];
+    }
+    
     if (self.interruptionObserverToken) {
         [NSNotificationCenter.defaultCenter removeObserver:self.interruptionObserverToken];
         self.interruptionObserverToken = nil;
@@ -82,6 +85,10 @@
         [NSNotificationCenter.defaultCenter removeObserver:self.routeChangeObserverToken];
         self.routeChangeObserverToken = nil;
     }
+}
+
+-(void)dealloc {
+    [self giveUpAudioFocus];
 }
 
 @end
