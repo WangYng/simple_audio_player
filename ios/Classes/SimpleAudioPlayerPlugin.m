@@ -97,6 +97,11 @@
     [player setVolume:volume];
 }
 
+- (void)setPlaybackRateWithPlayerId:(NSInteger)playerId playbackRate:(double)playbackRate {
+    SimpleAudioPlayerManager *player = self.playerManagerMap[@(playerId)];
+    [player setPlaybackRateWithRate:playbackRate];
+}
+
 - (NSInteger)getCurrentPositionWithPlayerId:(NSInteger)playerId {
     SimpleAudioPlayerManager *player = self.playerManagerMap[@(playerId)];
     return player.currentPosition;

@@ -5,8 +5,12 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:simple_audio_player/simple_audio_focus_manager.dart';
-import 'package:simple_audio_player/simple_audio_player.dart';
 import 'package:simple_audio_player/simple_audio_notification_manager.dart';
+import 'package:simple_audio_player/simple_audio_player.dart';
+
+final url = "https://96.f.1ting.com/local_to_cube_202004121813/96kmp3/2021/04/16/16b_am/01.mp3";
+
+final asset = "asset:///audios/02.mp3";
 
 void main() {
   runApp(MyApp());
@@ -23,6 +27,8 @@ class _MyAppState extends State<MyApp> {
   final notificationManager = SimpleAudioNotificationManager();
 
   double volumeValue = 1.0;
+
+  double rateValue = 1.0;
 
   double sliderValue = 0;
 
@@ -49,6 +55,19 @@ class _MyAppState extends State<MyApp> {
 
     simpleAudioPlayer = SimpleAudioPlayer();
     simpleAudioPlayer.songStateStream.listen((event) {
+      if (event.state == SimpleAudioPlayerSongState.onReady) {
+        setState(() {
+          sliderValue = 0;
+        });
+      } else if (event.state == SimpleAudioPlayerSongState.onPositionChange) {
+        setState(() {
+          sliderValue = event.data[0] / event.data[1];
+        });
+      } else if (event.state == SimpleAudioPlayerSongState.onPlayEnd) {
+        setState(() {
+          sliderValue = 1;
+        });
+      }
       print("song event : $event");
     });
     focusManager.audioFocusStream.listen((event) {
@@ -90,66 +109,130 @@ class _MyAppState extends State<MyApp> {
                 Row(
                   mainAxisSize: MainAxisSize.min,
                   children: [
+                    Text("prepare audio:"),
                     CupertinoButton(
-                      child: Text(
-                        "prepare\nurl",
-                        textAlign: TextAlign.center,
-                      ),
-                      onPressed: () => simpleAudioPlayer.prepare(
-                          uri: "https://96.f.1ting.com/local_to_cube_202004121813/96kmp3/2021/04/16/16b_am/01.mp3"),
+                      child: Text("url", textAlign: TextAlign.center),
+                      onPressed: () => simpleAudioPlayer.prepare(uri: url),
                     ),
                     CupertinoButton(
-                      child: Text(
-                        "prepare\nasset",
-                        textAlign: TextAlign.center,
-                      ),
-                      onPressed: () => simpleAudioPlayer.prepare(uri: "asset:///audios/02.mp3"),
+                      child: Text("asset", textAlign: TextAlign.center),
+                      onPressed: () => simpleAudioPlayer.prepare(uri: asset),
                     ),
                     CupertinoButton(
-                      child: Text(
-                        "prepare\nfile",
-                        textAlign: TextAlign.center,
-                      ),
-                      onPressed: file == null ? null : () => simpleAudioPlayer.prepare(uri: "file://${file?.path}"),
+                      child: Text("file", textAlign: TextAlign.center),
+                      onPressed: () => simpleAudioPlayer.prepare(uri: "file://${file?.path}"),
                     ),
                   ],
                 ),
-                CupertinoButton(
-                  child: Text("play"),
-                  onPressed: () => simpleAudioPlayer.play(),
+                Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Text("play immediately:"),
+                    CupertinoButton(
+                      child: Text("url", textAlign: TextAlign.center),
+                      onPressed: () {
+                        simpleAudioPlayer.prepare(uri: url);
+                        simpleAudioPlayer.setPlaybackRate(rate: rateValue);
+                        simpleAudioPlayer.play();
+                      },
+                    ),
+                    CupertinoButton(
+                      child: Text("asset", textAlign: TextAlign.center),
+                      onPressed: () {
+                        simpleAudioPlayer.prepare(uri: asset);
+                        simpleAudioPlayer.setPlaybackRate(rate: rateValue);
+                        simpleAudioPlayer.play();
+                      },
+                    ),
+                    CupertinoButton(
+                      child: Text("file", textAlign: TextAlign.center),
+                      onPressed: () {
+                        simpleAudioPlayer.prepare(uri: "file://${file?.path}");
+                        simpleAudioPlayer.setPlaybackRate(rate: rateValue);
+                        simpleAudioPlayer.play();
+                      },
+                    ),
+                  ],
                 ),
-                CupertinoButton(
-                  child: Text("pause"),
-                  onPressed: () => simpleAudioPlayer.pause(),
+                Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    CupertinoButton(
+                      child: Text("play"),
+                      onPressed: () {
+                        simpleAudioPlayer.setPlaybackRate(rate: rateValue);
+                        simpleAudioPlayer.play();
+                      },
+                    ),
+                    CupertinoButton(
+                      child: Text("pause"),
+                      onPressed: () => simpleAudioPlayer.pause(),
+                    ),
+                    CupertinoButton(
+                      child: Text("stop"),
+                      onPressed: () => simpleAudioPlayer.stop(),
+                    ),
+                  ],
                 ),
-                CupertinoButton(
-                  child: Text("stop"),
-                  onPressed: () => simpleAudioPlayer.stop(),
+                SizedBox(height: 10),
+                Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Text("volumn: "),
+                    SizedBox(width: 20),
+                    CupertinoSlider(
+                      value: volumeValue,
+                      onChanged: (changeValue) {
+                        setState(() {
+                          volumeValue = changeValue;
+                        });
+                      },
+                      onChangeEnd: (changeValue) async {
+                        simpleAudioPlayer.setVolume(volume: changeValue);
+                      },
+                    ),
+                  ],
                 ),
-                Text("volumn"),
-                CupertinoSlider(
-                  value: volumeValue,
-                  onChanged: (changeValue) {
-                    setState(() {
-                      volumeValue = changeValue;
-                    });
-                  },
-                  onChangeEnd: (changeValue) async {
-                    simpleAudioPlayer.setVolume(volume: changeValue);
-                  },
+                SizedBox(height: 10),
+                Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Text("rate: "),
+                    SizedBox(width: 20),
+                    CupertinoSlider(
+                      min: 0.5,
+                      max: 2,
+                      value: rateValue,
+                      onChanged: (changeValue) {
+                        setState(() {
+                          rateValue = changeValue;
+                        });
+                      },
+                      onChangeEnd: (changeValue) async {
+                        simpleAudioPlayer.setPlaybackRate(rate: changeValue);
+                      },
+                    ),
+                  ],
                 ),
-                Text("progress"),
-                CupertinoSlider(
-                  value: sliderValue,
-                  onChanged: (changeValue) {
-                    setState(() {
-                      sliderValue = changeValue;
-                    });
-                  },
-                  onChangeEnd: (changeValue) async {
-                    final duration = await simpleAudioPlayer.getDuration();
-                    simpleAudioPlayer.seekTo(position: (duration * changeValue).toInt());
-                  },
+                SizedBox(height: 10),
+                Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Text("progress: "),
+                    SizedBox(width: 20),
+                    CupertinoSlider(
+                      value: sliderValue,
+                      onChanged: (changeValue) {
+                        setState(() {
+                          sliderValue = changeValue;
+                        });
+                      },
+                      onChangeEnd: (changeValue) async {
+                        final duration = await simpleAudioPlayer.getDuration();
+                        simpleAudioPlayer.seekTo(position: (duration * changeValue).toInt());
+                      },
+                    ),
+                  ],
                 ),
                 CupertinoButton(
                   child: Text("showNotification"),

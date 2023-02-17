@@ -18,9 +18,11 @@
 
 @property(nonatomic, assign) BOOL playWhenReady;
 
-@property (nonatomic, strong) id timeObserverToken;
+@property(nonatomic, strong) id timeObserverToken;
 
-@property (nonatomic, strong) id playToEndObserverToken;
+@property(nonatomic, strong) id playToEndObserverToken;
+
+@property(nonatomic, assign) double rate;
 
 @end
 
@@ -61,6 +63,9 @@
 
 - (void)play {
     [self.player play];
+    if (self.rate != 0 && self.player.rate != self.rate) {
+        self.player.rate = self.rate;
+    }
 }
 
 - (void)pause {
@@ -75,7 +80,7 @@
 
 - (void)seekToWithPosition:(NSInteger)position {
     if (self.player != nil && self.player.currentItem != nil) {
-        [self.player.currentItem seekToTime:CMTimeMake(position, 1000)];
+        [self.player.currentItem seekToTime:CMTimeMake(position, 1000) completionHandler:nil];
     }
 }
 
@@ -102,6 +107,17 @@
         return;
     } else {
         self.player.volume = volume;
+    }
+}
+
+- (void)setPlaybackRateWithRate:(double)playbackRate {
+    if (self.player == nil) {
+        return;
+    } else {
+        self.rate = playbackRate;
+        if (self.player.isPlaying) {
+            self.player.rate = self.rate;
+        }
     }
 }
 

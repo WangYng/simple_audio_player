@@ -70,6 +70,10 @@ class SimpleAudioPlayer {
     return SimpleAudioPlayerApi.setVolume(playerId: playerId, volume: volume);
   }
 
+  Future<void> setPlaybackRate({required double rate}) async {
+    return SimpleAudioPlayerApi.setPlaybackRate(playerId: playerId, playbackRate: rate);
+  }
+
   Future<int> getCurrentPosition() async {
     return SimpleAudioPlayerApi.getCurrentPosition(playerId: playerId);
   }

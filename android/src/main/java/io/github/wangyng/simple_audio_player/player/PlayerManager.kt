@@ -16,6 +16,8 @@ interface PlayerManager {
 
     fun setVolume(volume: Double)
 
+    fun setRate(rate: Double)
+
     fun getCurrentPosition(): Long
 
     fun getDuration(): Long

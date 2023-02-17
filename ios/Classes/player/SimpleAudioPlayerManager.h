@@ -41,5 +41,7 @@
 
 - (void)setVolume:(double)volume;
 
+- (void)setPlaybackRateWithRate:(double)playbackRate;
+
 @end
 

@@ -107,6 +107,10 @@ class ExoPlayerManager(private val context: Context) : PlayerManager {
         mExoPlayer?.volume = volume.toFloat();
     }
 
+    override fun setRate(rate: Double) {
+        mExoPlayer?.setPlaybackSpeed(rate.toFloat());
+    }
+
     // ---------- utility ----------
     private fun buildDataSourceFactory(context: Context): DataSource.Factory {
         val bandwidthMeter = DefaultBandwidthMeter.Builder(context).build()

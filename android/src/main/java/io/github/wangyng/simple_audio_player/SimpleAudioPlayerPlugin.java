@@ -149,6 +149,12 @@ public class SimpleAudioPlayerPlugin implements FlutterPlugin, SimpleAudioPlayer
     }
 
     @Override
+    public void setPlaybackRate(Context context, int playerId, double playbackRate) {
+        PlayerManager player = playerManagerMap.get(playerId);
+        player.setRate(playbackRate);
+    }
+
+    @Override
     public Long getCurrentPosition(Context context, int playerId) {
         PlayerManager player = playerManagerMap.get(playerId);
         return player.getCurrentPosition();
