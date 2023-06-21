@@ -4,6 +4,6 @@
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
 
     <application>
-        <service android:name=".player.AudioNotificationServer" />
+        <service android:name=".player.AudioNotificationServer" android:exported="false" />
     </application>
 </manifest>

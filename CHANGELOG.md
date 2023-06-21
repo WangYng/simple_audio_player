@@ -42,3 +42,6 @@ fix some issues.
 
 ## 0.2.0
 add playback rate setting.
+
+## 0.2.1
+fix some issues.
