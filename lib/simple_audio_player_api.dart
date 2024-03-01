@@ -229,6 +229,27 @@ class SimpleAudioPlayerApi {
     }
   }
 
+  static Future<double> getPlaybackRate({required int playerId}) async {
+    const channel = BasicMessageChannel<dynamic>('io.github.wangyng.simple_audio_player.getPlaybackRate', StandardMessageCodec());
+
+    final Map<String, dynamic> requestMap = {};
+    requestMap["playerId"] = playerId;
+    final reply = await channel.send(requestMap);
+
+    if (!(reply is Map)) {
+      _throwChannelException();
+    }
+
+    final replyMap = Map<String, dynamic>.from(reply);
+    if (replyMap['error'] != null) {
+      final error = Map<String, dynamic>.from(replyMap['error']);
+      _throwException(error);
+      return 0.0;
+    } else {
+      return replyMap["result"];
+    }
+  }
+
   static Future<bool> tryToGetAudioFocus() async {
     const channel = BasicMessageChannel<dynamic>('io.github.wangyng.simple_audio_player.tryToGetAudioFocus', StandardMessageCodec());
 
@@ -269,34 +290,11 @@ class SimpleAudioPlayerApi {
     }
   }
 
-  static Future<void> showNotification({required String title, required String artist, required String clipArt}) async {
+  static Future<void> showNotification({required int playerId, required String title, required String artist, required String clipArt}) async {
     const channel = BasicMessageChannel<dynamic>('io.github.wangyng.simple_audio_player.showNotification', StandardMessageCodec());
 
     final Map<String, dynamic> requestMap = {};
-    requestMap["title"] = title;
-    requestMap["artist"] = artist;
-    requestMap["clipArt"] = clipArt;
-    final reply = await channel.send(requestMap);
-
-    if (!(reply is Map)) {
-      _throwChannelException();
-    }
-
-    final replyMap = Map<String, dynamic>.from(reply);
-    if (replyMap['error'] != null) {
-      final error = Map<String, dynamic>.from(replyMap['error']);
-      _throwException(error);
-      
-    } else {
-      // noop
-    }
-  }
-
-  static Future<void> updateNotification({required bool showPlay, required String title, required String artist, required String clipArt}) async {
-    const channel = BasicMessageChannel<dynamic>('io.github.wangyng.simple_audio_player.updateNotification', StandardMessageCodec());
-
-    final Map<String, dynamic> requestMap = {};
-    requestMap["showPlay"] = showPlay;
+    requestMap["playerId"] = playerId;
     requestMap["title"] = title;
     requestMap["artist"] = artist;
     requestMap["clipArt"] = clipArt;

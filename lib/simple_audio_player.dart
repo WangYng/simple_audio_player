@@ -1,5 +1,3 @@
-import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:simple_audio_player/simple_audio_player_api.dart';
 
 enum SimpleAudioPlayerSongState { onReady, onPlayEnd, onError, onPositionChange }
@@ -80,5 +78,9 @@ class SimpleAudioPlayer {
 
   Future<int> getDuration() async {
     return SimpleAudioPlayerApi.getDuration(playerId: playerId);
+  }
+
+  Future<double> getPlaybackRate() async {
+    return SimpleAudioPlayerApi.getPlaybackRate(playerId: playerId);
   }
 }

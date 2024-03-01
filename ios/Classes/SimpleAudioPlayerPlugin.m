@@ -112,6 +112,11 @@
     return player.duration;
 }
 
+- (double)getPlaybackRateWithPlayerId:(NSInteger)playerId {
+    SimpleAudioPlayerManager *player = self.playerManagerMap[@(playerId)];
+    return player.playbackRate;
+}
+
 - (void)giveUpAudioFocus {
     [self.audioFocusManager giveUpAudioFocus];
 }
@@ -142,22 +147,23 @@
     }
 }
 
-- (void)showNotificationWithTitle:(NSString *)title artist:(NSString *)artist clipArt:(NSString *)clipArt {
+- (void)showNotificationWithPlayerId:(NSInteger)playerId title:(NSString *)title artist:(NSString *)artist clipArt:(NSString *)clipArt {
+    SimpleAudioPlayerManager *player = self.playerManagerMap[@(playerId)];
+
+    SimpleAudioPlayerSong *song = [[SimpleAudioPlayerSong alloc] initWithTitle:title artist:artist clipArt:clipArt];
+
     if (self.notificationManager == nil) {
         self.notificationManager = [[SimpleAudioNotificationManager alloc] init];
         self.notificationManager.delegate = self;
+        [self.notificationManager showNotificationWithPlayer:player song:song];
+    } else {
+        [self.notificationManager updateNotificationWithPlayer:player song:song];
     }
-    SimpleAudioPlayerSong *song = [[SimpleAudioPlayerSong alloc] initWithTitle:title artist:artist clipArt:clipArt];
-    [self.notificationManager showNotificationWithSong:song];
-}
-
-- (void)updateNotificationWithShowPlay:(BOOL)showPlay title:(NSString *)title artist:(NSString *)artist clipArt:(NSString *)clipArt {
-    SimpleAudioPlayerSong *song = [[SimpleAudioPlayerSong alloc] initWithTitle:title artist:artist clipArt:clipArt];
-    [self.notificationManager updateNotificationWithShowPlay:showPlay song:song];
 }
 
 - (void)cancelNotification {
     [self.notificationManager cancelNotification];
+    self.notificationManager = nil;
 }
 
 - (void)onReceivePause {

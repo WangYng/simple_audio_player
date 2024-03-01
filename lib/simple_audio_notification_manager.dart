@@ -1,3 +1,4 @@
+import 'package:simple_audio_player/simple_audio_player.dart';
 import 'package:simple_audio_player/simple_audio_player_api.dart';
 
 enum SimpleAudioNotificationState {
@@ -31,12 +32,8 @@ class SimpleAudioNotificationManager {
     }
   });
 
-  Future<void> showNotification({required String title, required String artist, required String clipArt}) {
-    return SimpleAudioPlayerApi.showNotification(title: title, artist: artist, clipArt: clipArt);
-  }
-
-  Future<void> updateNotification({required bool showPlay, required String title, required String artist, required String clipArt}) {
-    return SimpleAudioPlayerApi.updateNotification(showPlay: showPlay, title: title, artist: artist, clipArt: clipArt);
+  Future<void> showNotification({required SimpleAudioPlayer player, required String title, required String artist, required String clipArt}) {
+    return SimpleAudioPlayerApi.showNotification(playerId: player.playerId, title: title, artist: artist, clipArt: clipArt);
   }
 
   Future<void> cancelNotification() {

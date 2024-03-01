@@ -5,9 +5,14 @@ import android.net.Uri
 import android.os.Handler
 import android.os.Looper
 import android.os.Message
-import com.google.android.exoplayer2.*
+import android.support.v4.media.session.MediaSessionCompat
+import android.support.v4.media.session.PlaybackStateCompat
 import com.google.android.exoplayer2.C.CONTENT_TYPE_MUSIC
 import com.google.android.exoplayer2.C.USAGE_MEDIA
+import com.google.android.exoplayer2.MediaItem
+import com.google.android.exoplayer2.PlaybackException
+import com.google.android.exoplayer2.Player
+import com.google.android.exoplayer2.SimpleExoPlayer
 import com.google.android.exoplayer2.audio.AudioAttributes
 import com.google.android.exoplayer2.source.ProgressiveMediaSource
 import com.google.android.exoplayer2.upstream.DataSource
@@ -21,13 +26,16 @@ class ExoPlayerManager(private val context: Context) : PlayerManager {
     private var mExoSongStateCallback: PlayerManager.SongStateCallback? = null
     private var mCurrentUri: Uri? = null
     private var mExoPlayer: SimpleExoPlayer? = null
+    private var mMediaSession: MediaSessionCompat? = null
+
+    private var mRate: Double = 1.0;
 
     private val mUpdateProgressHandler = object : Handler(Looper.getMainLooper()) {
         override fun handleMessage(msg: Message) {
             if (mExoPlayer?.isPlaying == true) {
                 val duration: Long = mExoPlayer?.duration ?: 0
                 val position: Long = mExoPlayer?.currentPosition ?: 0
-                mExoSongStateCallback?.onPositionChange(position, duration)
+                mExoSongStateCallback?.onPositionChange(position.toInt(), duration.toInt())
             }
 
             removeMessages(0)
@@ -39,12 +47,20 @@ class ExoPlayerManager(private val context: Context) : PlayerManager {
         mExoSongStateCallback = callback
     }
 
-    override fun getCurrentPosition(): Long {
-        return mExoPlayer?.currentPosition ?: 0
+    override fun getCurrentPosition(): Int {
+        return mExoPlayer?.currentPosition?.toInt() ?: 0
     }
 
-    override fun getDuration(): Long {
-        return mExoPlayer?.duration ?: 0
+    override fun getDuration(): Int {
+        return mExoPlayer?.duration?.toInt() ?: 0
+    }
+
+    override fun getPlaybackRate(): Double {
+        return mRate
+    }
+
+    override fun isPlaying(): Boolean {
+        return mExoPlayer?.isPlaying ?: false
     }
 
     override fun prepare(uri: Uri) {
@@ -99,8 +115,8 @@ class ExoPlayerManager(private val context: Context) : PlayerManager {
         mExoPlayer = null
     }
 
-    override fun seekTo(position: Long) {
-        mExoPlayer?.seekTo(position)
+    override fun seekTo(position: Int) {
+        mExoPlayer?.seekTo(position.toLong())
     }
 
     override fun setVolume(volume: Double) {
@@ -108,7 +124,22 @@ class ExoPlayerManager(private val context: Context) : PlayerManager {
     }
 
     override fun setRate(rate: Double) {
+        mRate = rate;
         mExoPlayer?.setPlaybackSpeed(rate.toFloat());
+    }
+
+    override fun getMediaSession(): MediaSessionCompat? {
+        if (mExoPlayer != null && mMediaSession == null) {
+            val playBackStateBuilder = PlaybackStateCompat.Builder().setActions(
+                PlaybackStateCompat.ACTION_PLAY or PlaybackStateCompat.ACTION_PAUSE
+            )
+
+            mMediaSession = MediaSessionCompat(context, context.packageName)
+            mMediaSession?.setPlaybackState(playBackStateBuilder.build())
+            mMediaSession?.setCallback(SimpleSessionCallback(mExoPlayer!!))
+        }
+
+        return mMediaSession
     }
 
     // ---------- utility ----------
@@ -141,6 +172,17 @@ class ExoPlayerManager(private val context: Context) : PlayerManager {
         override fun onPlayerError(error: PlaybackException) {
             mExoSongStateCallback?.onError(error.message ?: "onPlayerError")
             stop()
+        }
+    }
+
+    private inner class SimpleSessionCallback(val simpleExoPlayer: SimpleExoPlayer) :
+        MediaSessionCompat.Callback() {
+        override fun onPlay() {
+            simpleExoPlayer.playWhenReady = true
+        }
+
+        override fun onPause() {
+            simpleExoPlayer.playWhenReady = false
         }
     }
 

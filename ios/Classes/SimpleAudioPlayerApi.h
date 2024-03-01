@@ -5,7 +5,7 @@
 //  SimpleAudioPlayerApi.h
 //  Pods
 //
-//  Created by 汪洋 on 2021/8/16.
+//  Created by 汪洋 on 2024/3/1.
 //
 
 #import <Foundation/Foundation.h>
@@ -42,13 +42,13 @@
 
 - (NSInteger)getDurationWithPlayerId:(NSInteger)playerId;
 
+- (double)getPlaybackRateWithPlayerId:(NSInteger)playerId;
+
 - (BOOL)tryToGetAudioFocus;
 
 - (void)giveUpAudioFocus;
 
-- (void)showNotificationWithTitle:(NSString *)title artist:(NSString *)artist clipArt:(NSString *)clipArt;
-
-- (void)updateNotificationWithShowPlay:(BOOL)showPlay title:(NSString *)title artist:(NSString *)artist clipArt:(NSString *)clipArt;
+- (void)showNotificationWithPlayerId:(NSInteger)playerId title:(NSString *)title artist:(NSString *)artist clipArt:(NSString *)clipArt;
 
 - (void)cancelNotification;
 

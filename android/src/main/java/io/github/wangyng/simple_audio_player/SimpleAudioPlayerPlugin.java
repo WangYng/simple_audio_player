@@ -98,7 +98,7 @@ public class SimpleAudioPlayerPlugin implements FlutterPlugin, SimpleAudioPlayer
             }
 
             @Override
-            public void onPositionChange(long position, long duration) {
+            public void onPositionChange(int position, int duration) {
                 if (songStateStream != null && songStateStream.event != null) {
                     Map<String, Object> result = new HashMap<>();
                     result.put("playerId", playerId);
@@ -137,13 +137,13 @@ public class SimpleAudioPlayerPlugin implements FlutterPlugin, SimpleAudioPlayer
     }
 
     @Override
-    public void seekTo(Context context, int playerId, Long position) {
+    public void seekTo(Context context, int playerId, int position) {
         PlayerManager player = playerManagerMap.get(playerId);
         player.seekTo(position);
     }
 
     @Override
-    public void setVolume(Context context, int playerId, Double volume) {
+    public void setVolume(Context context, int playerId, double volume) {
         PlayerManager player = playerManagerMap.get(playerId);
         player.setVolume(volume);
     }
@@ -155,15 +155,21 @@ public class SimpleAudioPlayerPlugin implements FlutterPlugin, SimpleAudioPlayer
     }
 
     @Override
-    public Long getCurrentPosition(Context context, int playerId) {
+    public int getCurrentPosition(Context context, int playerId) {
         PlayerManager player = playerManagerMap.get(playerId);
         return player.getCurrentPosition();
     }
 
     @Override
-    public Long getDuration(Context context, int playerId) {
+    public int getDuration(Context context, int playerId) {
         PlayerManager player = playerManagerMap.get(playerId);
         return player.getDuration();
+    }
+
+    @Override
+    public double getPlaybackRate(Context context, int playerId) {
+        PlayerManager player = playerManagerMap.get(playerId);
+        return player.getPlaybackRate();
     }
 
     @Override
@@ -203,7 +209,9 @@ public class SimpleAudioPlayerPlugin implements FlutterPlugin, SimpleAudioPlayer
     }
 
     @Override
-    public void showNotification(Context context, String title, String artist, String clipArt) {
+    public void showNotification(Context context,int playerId, String title, String artist, String clipArt) {
+        PlayerManager player = playerManagerMap.get(playerId);
+
         if (audioNotificationManager == null) {
             audioNotificationManager = new AudioNotificationManager(context);
             audioNotificationManager.setCallback(new AudioNotificationManager.AudioNotificationEventCallback() {
@@ -242,14 +250,10 @@ public class SimpleAudioPlayerPlugin implements FlutterPlugin, SimpleAudioPlayer
                     }
                 }
             });
-        }
-        audioNotificationManager.showNotification(new Song(title, artist, clipArt));
-    }
 
-    @Override
-    public void updateNotification(Context context, boolean showPlay, String title, String artist, String clipArt) {
-        if (audioNotificationManager != null) {
-            audioNotificationManager.updateNotification(showPlay, new Song(title, artist, clipArt));
+            audioNotificationManager.showNotification(player, new Song(title, artist, clipArt));
+        } else {
+            audioNotificationManager.updateNotification(player, new Song(title, artist, clipArt));
         }
     }
 

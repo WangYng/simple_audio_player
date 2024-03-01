@@ -38,23 +38,23 @@ public interface SimpleAudioPlayerApi {
 
     void stop(Context context, int playerId);
 
-    void seekTo(Context context, int playerId, Long position);
+    void seekTo(Context context, int playerId, int position);
 
-    void setVolume(Context context, int playerId, Double volume);
+    void setVolume(Context context, int playerId, double volume);
 
-    Long getCurrentPosition(Context context, int playerId);
     void setPlaybackRate(Context context, int playerId, double playbackRate);
 
+    int getCurrentPosition(Context context, int playerId);
 
-    Long getDuration(Context context, int playerId);
+    int getDuration(Context context, int playerId);
+
+    double getPlaybackRate(Context context, int playerId);
 
     boolean tryToGetAudioFocus(Context context);
 
     void giveUpAudioFocus(Context context);
 
-    void showNotification(Context context, String title, String artist, String clipArt);
-
-    void updateNotification(Context context, boolean showPlay, String title, String artist, String clipArt);
+    void showNotification(Context context, int playerId, String title, String artist, String clipArt);
 
     void cancelNotification(Context context);
 
@@ -259,8 +259,8 @@ public interface SimpleAudioPlayerApi {
                     Map<String, Object> wrapped = new HashMap<>();
                     try {
                         HashMap<String, Object> params = (HashMap<String, Object>) message;
-                        int playerId = (int) params.get("playerId");
-                        Long position = (long) (int) params.get("position");
+                        int playerId = (int)params.get("playerId");
+                        int position = (int)params.get("position");
                         api.seekTo(context, playerId, position);
                         wrapped.put("result", null);
                     } catch (Exception exception) {
@@ -280,8 +280,8 @@ public interface SimpleAudioPlayerApi {
                     Map<String, Object> wrapped = new HashMap<>();
                     try {
                         HashMap<String, Object> params = (HashMap<String, Object>) message;
-                        int playerId = (int) params.get("playerId");
-                        double volume = (double) params.get("volume");
+                        int playerId = (int)params.get("playerId");
+                        double volume = (double)params.get("volume");
                         api.setVolume(context, playerId, volume);
                         wrapped.put("result", null);
                     } catch (Exception exception) {
@@ -323,7 +323,7 @@ public interface SimpleAudioPlayerApi {
                     try {
                         HashMap<String, Object> params = (HashMap<String, Object>) message;
                         int playerId = (int)params.get("playerId");
-                        Long result = api.getCurrentPosition(context, playerId);
+                        int result = api.getCurrentPosition(context, playerId);
                         wrapped.put("result", result);
                     } catch (Exception exception) {
                         wrapped.put("error", wrapError(exception));
@@ -343,7 +343,27 @@ public interface SimpleAudioPlayerApi {
                     try {
                         HashMap<String, Object> params = (HashMap<String, Object>) message;
                         int playerId = (int)params.get("playerId");
-                        Long result = api.getDuration(context, playerId);
+                        int result = api.getDuration(context, playerId);
+                        wrapped.put("result", result);
+                    } catch (Exception exception) {
+                        wrapped.put("error", wrapError(exception));
+                    }
+                    reply.reply(wrapped);
+                });
+            } else {
+                channel.setMessageHandler(null);
+            }
+        }
+
+        {
+            BasicMessageChannel<Object> channel = new BasicMessageChannel<>(binaryMessenger, "io.github.wangyng.simple_audio_player.getPlaybackRate", new StandardMessageCodec());
+            if (api != null) {
+                channel.setMessageHandler((message, reply) -> {
+                    Map<String, Object> wrapped = new HashMap<>();
+                    try {
+                        HashMap<String, Object> params = (HashMap<String, Object>) message;
+                        int playerId = (int)params.get("playerId");
+                        double result = api.getPlaybackRate(context, playerId);
                         wrapped.put("result", result);
                     } catch (Exception exception) {
                         wrapped.put("error", wrapError(exception));
@@ -398,33 +418,11 @@ public interface SimpleAudioPlayerApi {
                     Map<String, Object> wrapped = new HashMap<>();
                     try {
                         HashMap<String, Object> params = (HashMap<String, Object>) message;
+                        int playerId = (int)params.get("playerId");
                         String title = (String)params.get("title");
                         String artist = (String)params.get("artist");
                         String clipArt = (String)params.get("clipArt");
-                        api.showNotification(context, title, artist, clipArt);
-                        wrapped.put("result", null);
-                    } catch (Exception exception) {
-                        wrapped.put("error", wrapError(exception));
-                    }
-                    reply.reply(wrapped);
-                });
-            } else {
-                channel.setMessageHandler(null);
-            }
-        }
-
-        {
-            BasicMessageChannel<Object> channel = new BasicMessageChannel<>(binaryMessenger, "io.github.wangyng.simple_audio_player.updateNotification", new StandardMessageCodec());
-            if (api != null) {
-                channel.setMessageHandler((message, reply) -> {
-                    Map<String, Object> wrapped = new HashMap<>();
-                    try {
-                        HashMap<String, Object> params = (HashMap<String, Object>) message;
-                        boolean showPlay = (boolean)params.get("showPlay");
-                        String title = (String)params.get("title");
-                        String artist = (String)params.get("artist");
-                        String clipArt = (String)params.get("clipArt");
-                        api.updateNotification(context, showPlay, title, artist, clipArt);
+                        api.showNotification(context, playerId, title, artist, clipArt);
                         wrapped.put("result", null);
                     } catch (Exception exception) {
                         wrapped.put("error", wrapError(exception));

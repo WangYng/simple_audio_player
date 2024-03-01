@@ -13,6 +13,10 @@ class AudioNotificationServer : Service() {
         return START_NOT_STICKY
     }
 
+    override fun onTaskRemoved(rootIntent: Intent?) {
+        stopSelf();
+    }
+
     override fun onBind(intent: Intent): IBinder {
         return binder
     }

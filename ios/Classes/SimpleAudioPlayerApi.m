@@ -5,7 +5,7 @@
 //  SimpleAudioPlayerApi.m
 //  Pods
 //
-//  Created by 汪洋 on 2021/8/16.
+//  Created by 汪洋 on 2024/3/1.
 //
 
 #import "SimpleAudioPlayerApi.h"
@@ -177,7 +177,7 @@
             [channel setMessageHandler:nil];
         }
     }
-    
+
     {
         FlutterBasicMessageChannel *channel =[FlutterBasicMessageChannel messageChannelWithName:@"io.github.wangyng.simple_audio_player.setVolume" binaryMessenger:messenger];
         if (api != nil) {
@@ -261,6 +261,26 @@
     }
 
     {
+        FlutterBasicMessageChannel *channel =[FlutterBasicMessageChannel messageChannelWithName:@"io.github.wangyng.simple_audio_player.getPlaybackRate" binaryMessenger:messenger];
+        if (api != nil) {
+            [channel setMessageHandler:^(id  message, FlutterReply reply) {
+                NSMutableDictionary<NSString *, NSObject *> *wrapped = [NSMutableDictionary new];
+                if ([message isKindOfClass:[NSDictionary class]]) {
+                    NSDictionary *params = message;
+                    NSInteger playerId = [params[@"playerId"] integerValue];
+                    double result = [api getPlaybackRateWithPlayerId:playerId];
+                    wrapped[@"result"] = @(result);
+                } else {
+                    wrapped[@"error"] = @{@"message": @"parse message error"};
+                }
+                reply(wrapped);
+            }];
+        } else {
+            [channel setMessageHandler:nil];
+        }
+    }
+
+    {
         FlutterBasicMessageChannel *channel =[FlutterBasicMessageChannel messageChannelWithName:@"io.github.wangyng.simple_audio_player.tryToGetAudioFocus" binaryMessenger:messenger];
         if (api != nil) {
             [channel setMessageHandler:^(id  message, FlutterReply reply) {
@@ -303,33 +323,11 @@
                 NSMutableDictionary<NSString *, NSObject *> *wrapped = [NSMutableDictionary new];
                 if ([message isKindOfClass:[NSDictionary class]]) {
                     NSDictionary *params = message;
+                    NSInteger playerId = [params[@"playerId"] integerValue];
                     NSString *title = params[@"title"];
                     NSString *artist = params[@"artist"];
                     NSString *clipArt = params[@"clipArt"];
-                    [api showNotificationWithTitle:title artist:artist clipArt:clipArt];
-                    wrapped[@"result"] = nil;
-                } else {
-                    wrapped[@"error"] = @{@"message": @"parse message error"};
-                }
-                reply(wrapped);
-            }];
-        } else {
-            [channel setMessageHandler:nil];
-        }
-    }
-
-    {
-        FlutterBasicMessageChannel *channel =[FlutterBasicMessageChannel messageChannelWithName:@"io.github.wangyng.simple_audio_player.updateNotification" binaryMessenger:messenger];
-        if (api != nil) {
-            [channel setMessageHandler:^(id  message, FlutterReply reply) {
-                NSMutableDictionary<NSString *, NSObject *> *wrapped = [NSMutableDictionary new];
-                if ([message isKindOfClass:[NSDictionary class]]) {
-                    NSDictionary *params = message;
-                    BOOL showPlay = [params[@"showPlay"] boolValue];
-                    NSString *title = params[@"title"];
-                    NSString *artist = params[@"artist"];
-                    NSString *clipArt = params[@"clipArt"];
-                    [api updateNotificationWithShowPlay:showPlay title:title artist:artist clipArt:clipArt];
+                    [api showNotificationWithPlayerId:playerId title:title artist:artist clipArt:clipArt];
                     wrapped[@"result"] = nil;
                 } else {
                     wrapped[@"error"] = @{@"message": @"parse message error"};

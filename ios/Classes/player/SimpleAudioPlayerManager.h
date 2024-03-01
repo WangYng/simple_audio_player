@@ -29,6 +29,10 @@
 
 @property (nonatomic, assign, readonly) NSInteger duration;
 
+@property (nonatomic, assign, readonly) BOOL isPlaying;
+
+@property (nonatomic, assign, readonly) double playbackRate;
+
 - (void)prepareWithUrl:(NSURL *)url;
 
 - (void)play;

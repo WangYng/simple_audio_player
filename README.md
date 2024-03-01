@@ -8,7 +8,7 @@ A simple audio player for Flutter.
 
 ```yaml
 dependencies:
-  simple_audio_player: ^0.2.1
+  simple_audio_player: ^1.0.0
 ```
 
 2. Install it
@@ -82,11 +82,7 @@ $ flutter packages get
   ),
   CupertinoButton(
     child: Text("showNotification"),
-    onPressed: () => notificationManager.showNotification(title: "title", artist: "artist", clipArt: ""),
-  ),
-  CupertinoButton(
-    child: Text("updateNotification"),
-    onPressed: () => notificationManager.updateNotification(showPlay: false, title: "update", artist: "update", clipArt: ""),
+    onPressed: () => notificationManager.showNotification(player: player, title: "title", artist: "artist", clipArt: ""),
   ),
   CupertinoButton(
     child: Text("cancelNotification"),

@@ -23,6 +23,7 @@ dependencies:
 
   path_provider: ^2.0.10
   file: 6.1.4
+  http: any
 
 dev_dependencies:
   flutter_test:

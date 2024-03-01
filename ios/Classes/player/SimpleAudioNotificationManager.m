@@ -14,6 +14,8 @@
 
 @property (nonatomic, strong) MPNowPlayingInfoCenter *playingCenter;
 
+@property (nonatomic, strong) SimpleAudioPlayerManager *player;
+
 @property (nonatomic, strong) SimpleAudioPlayerSong *song;
 
 @end
@@ -36,7 +38,7 @@
 
 @implementation SimpleAudioNotificationManager
 
-- (void)showNotificationWithSong:(SimpleAudioPlayerSong *)song {
+- (void)showNotificationWithPlayer:(SimpleAudioPlayerManager *) player song:(SimpleAudioPlayerSong *)song {
     [UIApplication.sharedApplication beginReceivingRemoteControlEvents];
 
     if (self.playingCenter == nil) {
@@ -45,12 +47,15 @@
     if (self.remoteCommandCenter == nil) {
         self.remoteCommandCenter = [MPRemoteCommandCenter sharedCommandCenter];
     }
+    
+    self.player = player;
     self.song = song;
     
     [self updateNotification];
 }
 
-- (void)updateNotificationWithShowPlay:(BOOL)showPlay song:(SimpleAudioPlayerSong *)song {
+- (void)updateNotificationWithPlayer:(SimpleAudioPlayerManager *) player  song:(SimpleAudioPlayerSong *)song {
+    self.player = player;
     self.song = song;
     
     [self updateNotification];
@@ -85,6 +90,9 @@
 
     self.playingCenter = nil;
     self.remoteCommandCenter = nil;
+    
+    self.player = nil;
+    self.song = nil;
     
     [UIApplication.sharedApplication endReceivingRemoteControlEvents];
 }
@@ -123,10 +131,14 @@
     NSMutableDictionary<NSString *,id> *playingInfo = [@{
         MPMediaItemPropertyTitle: self.song.title,
         MPMediaItemPropertyArtist: self.song.artist,
+        MPMediaItemPropertyPlaybackDuration: @(self.player.duration / 1000),
+        MPNowPlayingInfoPropertyPlaybackRate: @(self.player.playbackRate),
+        MPNowPlayingInfoPropertyElapsedPlaybackTime: @(self.player.currentPosition / 1000),
     } mutableCopy];
     
-    if (self.song.clipArt != nil && [[NSFileManager defaultManager] fileExistsAtPath:self.song.clipArt]) {
-        UIImage *clipArtImage = [[UIImage alloc] initWithContentsOfFile:self.song.clipArt];
+    if (self.song.clipArt != nil && self.song.clipArt.length > 0 ) {
+        NSData *decodedData = [[NSData alloc] initWithBase64EncodedString:self.song.clipArt options:0];
+        UIImage *clipArtImage = [[UIImage alloc] initWithData:decodedData];
         playingInfo[MPMediaItemPropertyArtwork] = [[MPMediaItemArtwork alloc] initWithImage:clipArtImage];
     }
     

@@ -5,7 +5,7 @@
 //  SimpleAudioPlayerEventSink.m
 //  Pods
 //
-//  Created by 汪洋 on 2021/8/6.
+//  Created by 汪洋 on 2024/3/1.
 //
 
 #import "SimpleAudioPlayerEventSink.h"

@@ -1,23 +1,28 @@
 package io.github.wangyng.simple_audio_player.player
 
-import android.app.*
+import android.app.Notification
+import android.app.NotificationChannel
+import android.app.NotificationManager
+import android.app.PendingIntent
 import android.content.*
+import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.os.Build
 import android.os.IBinder
-import android.util.Log
-import android.view.View
-import android.widget.RemoteViews
+import android.support.v4.media.MediaMetadataCompat
+import android.support.v4.media.session.PlaybackStateCompat
+import android.util.Base64
 import androidx.annotation.RequiresApi
 import androidx.core.app.NotificationCompat
 import io.github.wangyng.simple_audio_player.R
-import java.io.File
+
 
 class AudioNotificationManager(private val context: Context) : BroadcastReceiver() {
 
     private var mNotificationManager: NotificationManager? = null
     private var mCallback: AudioNotificationEventCallback? = null
 
+    private var mPlayer: PlayerManager? = null
     private var mSong: Song? = null
 
     private val mPlayIntent: PendingIntent
@@ -25,6 +30,7 @@ class AudioNotificationManager(private val context: Context) : BroadcastReceiver
     private val mPreviousIntent: PendingIntent
     private val mNextIntent: PendingIntent
     private val mStopIntent: PendingIntent
+    private val mOpenAppIntent: PendingIntent
     private var mHelper = NotificationHelper()
 
     private var mService: AudioNotificationServer? = null;
@@ -41,8 +47,13 @@ class AudioNotificationManager(private val context: Context) : BroadcastReceiver
                 addAction(ACTION_PREV)
                 addAction(ACTION_STOP)
             }
-            binder.service.registerReceiver(this@AudioNotificationManager, filter)
-            binder.service.startForeground(NOTIFICATION_ID, mHelper.generateNotification(mSong, true))
+            if (mPlayer != null && mSong != null) {
+                binder.service.registerReceiver(this@AudioNotificationManager, filter)
+                binder.service.startForeground(
+                    NOTIFICATION_ID,
+                    mHelper.generateNotification(mPlayer!!, mSong!!)
+                )
+            }
         }
 
         override fun onServiceDisconnected(classname: ComponentName) {
@@ -54,38 +65,56 @@ class AudioNotificationManager(private val context: Context) : BroadcastReceiver
         mNotificationManager = context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
 
         mPauseIntent = PendingIntent.getBroadcast(
-                context, NOTIFICATION_REQUEST_CODE,
-                Intent(ACTION_PAUSE).setPackage(context.packageName), PendingIntent.FLAG_CANCEL_CURRENT
+            context,
+            NOTIFICATION_REQUEST_CODE,
+            Intent(ACTION_PAUSE).setPackage(context.packageName),
+            PendingIntent.FLAG_CANCEL_CURRENT
         )
         mPlayIntent = PendingIntent.getBroadcast(
-                context, NOTIFICATION_REQUEST_CODE,
-                Intent(ACTION_PLAY).setPackage(context.packageName), PendingIntent.FLAG_CANCEL_CURRENT
+            context,
+            NOTIFICATION_REQUEST_CODE,
+            Intent(ACTION_PLAY).setPackage(context.packageName),
+            PendingIntent.FLAG_CANCEL_CURRENT
         )
         mPreviousIntent = PendingIntent.getBroadcast(
-                context, NOTIFICATION_REQUEST_CODE,
-                Intent(ACTION_PREV).setPackage(context.packageName), PendingIntent.FLAG_CANCEL_CURRENT
+            context,
+            NOTIFICATION_REQUEST_CODE,
+            Intent(ACTION_PREV).setPackage(context.packageName),
+            PendingIntent.FLAG_CANCEL_CURRENT
         )
         mNextIntent = PendingIntent.getBroadcast(
-                context, NOTIFICATION_REQUEST_CODE,
-                Intent(ACTION_NEXT).setPackage(context.packageName), PendingIntent.FLAG_CANCEL_CURRENT
+            context,
+            NOTIFICATION_REQUEST_CODE,
+            Intent(ACTION_NEXT).setPackage(context.packageName),
+            PendingIntent.FLAG_CANCEL_CURRENT
         )
         mStopIntent = PendingIntent.getBroadcast(
-                context, NOTIFICATION_REQUEST_CODE,
-                Intent(ACTION_STOP).setPackage(context.packageName), PendingIntent.FLAG_CANCEL_CURRENT
+            context,
+            NOTIFICATION_REQUEST_CODE,
+            Intent(ACTION_STOP).setPackage(context.packageName),
+            PendingIntent.FLAG_CANCEL_CURRENT
+        )
+        mOpenAppIntent = PendingIntent.getActivity(
+            context,
+            NOTIFICATION_REQUEST_CODE,
+            context.packageManager.getLaunchIntentForPackage(context.packageName),
+            PendingIntent.FLAG_CANCEL_CURRENT
         )
         mNotificationManager?.cancelAll()
     }
 
-    fun showNotification(song: Song?) {
+    fun showNotification(player: PlayerManager, song: Song) {
+        mPlayer = player;
         mSong = song
         val intent = Intent(context, AudioNotificationServer::class.java)
         context.bindService(intent, mConnection, Context.BIND_AUTO_CREATE)
     }
 
-    fun updateNotification(showPlay: Boolean, song: Song?) {
+    fun updateNotification(player: PlayerManager, song: Song) {
+        mPlayer = player;
         mSong = song
         if (mService != null) {
-            val notification = mHelper.generateNotification(song, showPlay)
+            val notification = mHelper.generateNotification(player, song)
             mNotificationManager?.notify(NOTIFICATION_ID, notification)
         }
     }
@@ -95,6 +124,7 @@ class AudioNotificationManager(private val context: Context) : BroadcastReceiver
             context.unbindService(mConnection)
             mService?.unregisterReceiver(this@AudioNotificationManager)
             mService?.stopForeground(true)
+            mPlayer?.getMediaSession()?.isActive = false
         }
     }
 
@@ -117,19 +147,26 @@ class AudioNotificationManager(private val context: Context) : BroadcastReceiver
 
         private var mSong: Song? = null
 
-        fun generateNotification(song: Song?, showPlayIcon: Boolean): Notification? {
-            mSong = song
-
+        fun generateNotification(player: PlayerManager, song: Song): Notification? {
             if (mNotificationBuilder == null) {
+
+                val style = androidx.media.app.NotificationCompat.MediaStyle()
+                if (player.getMediaSession() != null) {
+                    style.setMediaSession(player.getMediaSession()?.sessionToken)
+                    mPlayer?.getMediaSession()?.isActive = true
+                }
+                style.setShowActionsInCompactView(0, 1, 2)
+
                 mNotificationBuilder = NotificationCompat.Builder(context, CHANNEL_ID)
-                mNotificationBuilder?.setSmallIcon(R.drawable.itunes)
-                        ?.setLargeIcon(BitmapFactory.decodeResource(context.resources, R.drawable.itunes))
-                        ?.setContentTitle(context.getString(R.string.app_name))
-                        ?.setContentText(context.getString(R.string.app_name))
-                        ?.setDeleteIntent(mStopIntent)
-                        ?.setVisibility(NotificationCompat.VISIBILITY_PUBLIC)
-                        ?.setCategory(NotificationCompat.CATEGORY_TRANSPORT)
-                        ?.setOnlyAlertOnce(true)
+                mNotificationBuilder?.apply {
+                    setSmallIcon(R.drawable.ic_launcher)
+                    setDeleteIntent(mStopIntent)
+                    setContentIntent(mOpenAppIntent)
+                    setVisibility(NotificationCompat.VISIBILITY_PUBLIC)
+                    setCategory(NotificationCompat.CATEGORY_TRANSPORT)
+                    setOnlyAlertOnce(true)
+                    setStyle(style)
+                }
 
                 // Notification channels are only supported on Android O+.
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
@@ -137,165 +174,87 @@ class AudioNotificationManager(private val context: Context) : BroadcastReceiver
                 }
             }
 
-            val collapsedRemoteViews = RemoteViews(context.packageName, R.layout.player_collapsed_notification)
-            mNotificationBuilder?.setCustomContentView(collapsedRemoteViews)
-            val expandedRemoteViews = RemoteViews(context.packageName, R.layout.player_expanded_notification)
-            mNotificationBuilder?.setCustomBigContentView(expandedRemoteViews)
+            mNotificationBuilder?.apply {
+                if (mSong?.title != song.title) {
+                    setContentTitle(song.title ?: "")
+                }
+                if (mSong?.artist != song.artist) {
+                    setContentText(song.artist ?: "")
+                }
+                // 更新音频时长
+                val metadata = MediaMetadataCompat.Builder().apply {
+                    putLong(
+                        MediaMetadataCompat.METADATA_KEY_DURATION,
+                        player.getDuration().toLong()
+                    )
+                }
+                player.getMediaSession()?.setMetadata(metadata.build())
 
-            mNotificationBuilder?.setOngoing(true)
+                // 更新播放进度
+                val playBackState = PlaybackStateCompat.Builder().apply {
+                    setActions(PlaybackStateCompat.ACTION_PLAY or PlaybackStateCompat.ACTION_PAUSE)
+                    if (player.isPlaying()) {
+                        setState(
+                            PlaybackStateCompat.STATE_PLAYING,
+                            player.getCurrentPosition().toLong(),
+                            player.getPlaybackRate().toFloat(),
+                        )
+                    } else {
+                        setState(
+                            PlaybackStateCompat.STATE_PAUSED,
+                            player.getCurrentPosition().toLong(),
+                            player.getPlaybackRate().toFloat(),
+                        )
+                    }
 
-            createCollapsedRemoteViews(collapsedRemoteViews)
-            createExpandedRemoteViews(expandedRemoteViews)
+                }
+                player.getMediaSession()?.setPlaybackState(playBackState.build())
 
-            if (showPlayIcon) {
-                collapsedRemoteViews.setViewVisibility(
-                        R.id.collapsed_notification_pause_image_view,
-                        View.GONE
-                )
-                collapsedRemoteViews.setViewVisibility(
-                        R.id.collapsed_notification_play_image_view,
-                        View.VISIBLE
-                )
-                expandedRemoteViews.setViewVisibility(
-                        R.id.expanded_notification_pause_image_view,
-                        View.GONE
-                )
-                expandedRemoteViews.setViewVisibility(
-                        R.id.expanded_notification_play_image_view,
-                        View.VISIBLE
-                )
-            } else {
-                collapsedRemoteViews.setViewVisibility(
-                        R.id.collapsed_notification_pause_image_view,
-                        View.VISIBLE
-                )
-                collapsedRemoteViews.setViewVisibility(
-                        R.id.collapsed_notification_play_image_view,
-                        View.GONE
-                )
-                expandedRemoteViews.setViewVisibility(
-                        R.id.expanded_notification_pause_image_view,
-                        View.VISIBLE
-                )
-                expandedRemoteViews.setViewVisibility(
-                        R.id.expanded_notification_play_image_view,
-                        View.GONE
-                )
+                // 更新封面图片
+                if (mSong?.clipArt != song.clipArt) {
+                    var bitmap: Bitmap? = null
+                    try {
+                        val data = Base64.decode(song.clipArt ?: "", Base64.DEFAULT)
+                        bitmap = BitmapFactory.decodeByteArray(data, 0, data.size)
+                    } finally {
+                        setLargeIcon(
+                            bitmap ?: BitmapFactory.decodeResource(
+                                context.resources,
+                                R.drawable.ic_launcher
+                            )
+                        )
+                    }
+                }
+
+                // 更新按钮
+                clearActions()
+                addAction(android.R.drawable.ic_media_previous, "previous", mPreviousIntent)
+                if (player.isPlaying()) {
+                    addAction(android.R.drawable.ic_media_pause, "pause", mPauseIntent)
+                } else {
+                    addAction(android.R.drawable.ic_media_play, "play", mPlayIntent)
+                }
+                addAction(android.R.drawable.ic_media_next, "next", mNextIntent);
             }
+
+            mSong = song
 
             return mNotificationBuilder?.build()
-        }
-
-        private fun createExpandedRemoteViews(expandedRemoteViews: RemoteViews) {
-            expandedRemoteViews.setOnClickPendingIntent(
-                    R.id.expanded_notification_skip_back_image_view,
-                    mPreviousIntent
-            )
-            expandedRemoteViews.setOnClickPendingIntent(
-                    R.id.expanded_notification_clear_image_view,
-                    mStopIntent
-            )
-            expandedRemoteViews.setOnClickPendingIntent(
-                    R.id.expanded_notification_pause_image_view,
-                    mPauseIntent
-            )
-            expandedRemoteViews.setOnClickPendingIntent(
-                    R.id.expanded_notification_skip_next_image_view,
-                    mNextIntent
-            )
-            expandedRemoteViews.setOnClickPendingIntent(
-                    R.id.expanded_notification_play_image_view,
-                    mPlayIntent
-            )
-            expandedRemoteViews.setImageViewResource(
-                    R.id.expanded_notification_image_view,
-                    R.drawable.placeholder
-            )
-            mSong?.clipArt?.let {
-                if (it.isNotEmpty()) {
-                    val bitmap = BitmapFactory.decodeFile(File(it).path)
-                    expandedRemoteViews.setImageViewBitmap(R.id.expanded_notification_image_view, bitmap)
-                }
-            }
-            expandedRemoteViews.setViewVisibility(
-                    R.id.expanded_notification_skip_next_image_view,
-                    View.VISIBLE
-            )
-            expandedRemoteViews.setViewVisibility(
-                    R.id.expanded_notification_skip_back_image_view,
-                    View.VISIBLE
-            )
-            expandedRemoteViews.setTextViewText(
-                    R.id.expanded_notification_song_name_text_view,
-                    mSong?.title ?: ""
-            )
-            expandedRemoteViews.setTextViewText(
-                    R.id.expanded_notification_singer_name_text_view,
-                    mSong?.artist ?: ""
-            )
-        }
-
-        private fun createCollapsedRemoteViews(collapsedRemoteViews: RemoteViews) {
-            collapsedRemoteViews.setOnClickPendingIntent(
-                    R.id.collapsed_notification_skip_back_image_view,
-                    mPreviousIntent
-            )
-            collapsedRemoteViews.setOnClickPendingIntent(
-                    R.id.collapsed_notification_clear_image_view,
-                    mStopIntent
-            )
-            collapsedRemoteViews.setOnClickPendingIntent(
-                    R.id.collapsed_notification_pause_image_view,
-                    mPauseIntent
-            )
-            collapsedRemoteViews.setOnClickPendingIntent(
-                    R.id.collapsed_notification_skip_next_image_view,
-                    mNextIntent
-            )
-            collapsedRemoteViews.setOnClickPendingIntent(
-                    R.id.collapsed_notification_play_image_view,
-                    mPlayIntent
-            )
-            collapsedRemoteViews.setImageViewResource(
-                    R.id.collapsed_notification_image_view,
-                    R.drawable.placeholder
-            )
-            mSong?.clipArt?.let {
-                if (it.isNotEmpty()) {
-                    val bitmap = BitmapFactory.decodeFile(File(it).path)
-                    collapsedRemoteViews.setImageViewBitmap(R.id.collapsed_notification_image_view, bitmap)
-                }
-            }
-            collapsedRemoteViews.setViewVisibility(
-                    R.id.collapsed_notification_skip_next_image_view,
-                    View.VISIBLE
-            )
-            collapsedRemoteViews.setViewVisibility(
-                    R.id.collapsed_notification_skip_back_image_view,
-                    View.VISIBLE
-            )
-            collapsedRemoteViews.setTextViewText(
-                    R.id.collapsed_notification_song_name_text_view,
-                    mSong?.title ?: ""
-            )
-            collapsedRemoteViews.setTextViewText(
-                    R.id.collapsed_notification_singer_name_text_view,
-                    mSong?.artist ?: ""
-            )
         }
 
         @RequiresApi(Build.VERSION_CODES.O)
         fun createNotificationChannel() {
             if (mNotificationManager?.getNotificationChannel(CHANNEL_ID) == null) {
                 val notificationChannel = NotificationChannel(
-                        CHANNEL_ID, context.getString(R.string.notification_channel),
-                        NotificationManager.IMPORTANCE_LOW
+                    CHANNEL_ID, "PlayerChannel",
+                    NotificationManager.IMPORTANCE_LOW
                 )
-                notificationChannel.description =
-                        context.getString(R.string.notification_channel_description)
+                notificationChannel.description = "PlayerChannel"
                 mNotificationManager?.createNotificationChannel(notificationChannel)
             }
         }
+
+
     }
 
     companion object {

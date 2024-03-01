@@ -7,6 +7,7 @@
 
 #import <Foundation/Foundation.h>
 #import "SimpleAudioPlayerSong.h"
+#import "SimpleAudioPlayerManager.h"
 
 @protocol SimpleAudioNotificationDelegate <NSObject>
 @required
@@ -27,9 +28,9 @@
 
 @property(nonatomic, weak) id<SimpleAudioNotificationDelegate> delegate;
 
-- (void)showNotificationWithSong:(SimpleAudioPlayerSong *)song;
+- (void)showNotificationWithPlayer:(SimpleAudioPlayerManager *) player  song:(SimpleAudioPlayerSong *)song;
 
-- (void)updateNotificationWithShowPlay:(BOOL)showPlay song:(SimpleAudioPlayerSong *)song;
+- (void)updateNotificationWithPlayer:(SimpleAudioPlayerManager *) player  song:(SimpleAudioPlayerSong *)song;
 
 - (void)cancelNotification;
 

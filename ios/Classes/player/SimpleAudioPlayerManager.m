@@ -102,6 +102,14 @@
     }
 }
 
+- (BOOL)isPlaying {
+    if (self.player == nil) {
+        return NO;
+    } else {
+        return self.player.isPlaying;
+    }
+}
+
 - (void)setVolume:(double)volume {
     if (self.player == nil) {
         return;
@@ -118,6 +126,14 @@
         if (self.player.isPlaying) {
             self.player.rate = self.rate;
         }
+    }
+}
+
+- (double)playbackRate {
+    if (self.player == nil) {
+        return 1.0;
+    } else {
+        return self.player.rate;
     }
 }
 

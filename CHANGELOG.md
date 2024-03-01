@@ -45,3 +45,6 @@ add playback rate setting.
 
 ## 0.2.1
 fix some issues.
+
+## 1.0.0
+fix notification issues.
