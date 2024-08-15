@@ -48,3 +48,6 @@ fix some issues.
 
 ## 1.0.0
 fix notification issues.
+
+## 1.0.1
+upgrade kotlin.

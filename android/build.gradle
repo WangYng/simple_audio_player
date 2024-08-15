@@ -2,7 +2,7 @@ group 'io.github.wangyng.simple_audio_player'
 version '1.0'
 
 buildscript {
-    ext.kotlin_version = "1.4.32"
+    ext.kotlin_version = "1.5.20"
     repositories {
         google()
         jcenter()

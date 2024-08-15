@@ -1,6 +1,6 @@
 name: simple_audio_player
 description: A simple audio player for Flutter.
-version: 1.0.0
+version: 1.0.1
 homepage: https://github.com/WangYng
 repository: https://github.com/WangYng/simple_audio_player
 
