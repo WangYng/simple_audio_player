@@ -51,3 +51,6 @@ fix notification issues.
 
 ## 1.0.1
 upgrade kotlin.
+
+## 1.0.2
+fix ios crash.

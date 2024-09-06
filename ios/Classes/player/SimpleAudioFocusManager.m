@@ -20,9 +20,12 @@
 
 - (BOOL)tryToGetAudioFocus {
     NSError *error;
-    [AVAudioSession.sharedInstance setActive:YES error:&error];
     [AVAudioSession.sharedInstance setCategory:AVAudioSessionCategoryPlayback error:&error];
-    
+    if (error != nil) {
+        return NO;
+    }
+
+    [AVAudioSession.sharedInstance setActive:YES error:&error];
     if (error != nil) {
         return NO;
     }
