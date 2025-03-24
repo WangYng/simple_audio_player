@@ -1,28 +1,29 @@
 PODS:
   - Flutter (1.0.0)
-  - path_provider_ios (0.0.1):
+  - path_provider_foundation (0.0.1):
     - Flutter
+    - FlutterMacOS
   - simple_audio_player (0.0.1):
     - Flutter
 
 DEPENDENCIES:
   - Flutter (from `Flutter`)
-  - path_provider_ios (from `.symlinks/plugins/path_provider_ios/ios`)
+  - path_provider_foundation (from `.symlinks/plugins/path_provider_foundation/darwin`)
   - simple_audio_player (from `.symlinks/plugins/simple_audio_player/ios`)
 
 EXTERNAL SOURCES:
   Flutter:
     :path: Flutter
-  path_provider_ios:
-    :path: ".symlinks/plugins/path_provider_ios/ios"
+  path_provider_foundation:
+    :path: ".symlinks/plugins/path_provider_foundation/darwin"
   simple_audio_player:
     :path: ".symlinks/plugins/simple_audio_player/ios"
 
 SPEC CHECKSUMS:
-  Flutter: f04841e97a9d0b0a8025694d0796dd46242b2854
-  path_provider_ios: 14f3d2fd28c4fdb42f44e0f751d12861c43cee02
-  simple_audio_player: 61e356d9dea6ee469457a4312d830a8f3b281595
+  Flutter: e0871f40cf51350855a761d2e70bf5af5b9b5de7
+  path_provider_foundation: 080d55be775b7414fd5a5ef3ac137b97b097e564
+  simple_audio_player: c854b8e3a519f63f78bd893fc94ef466ccbcff98
 
 PODFILE CHECKSUM: 663715e941f9adb426e33bf9376914006f9ea95b
 
-COCOAPODS: 1.14.3
+COCOAPODS: 1.16.2

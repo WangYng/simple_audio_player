@@ -178,11 +178,11 @@ class ExoPlayerManager(private val context: Context) : PlayerManager {
     private inner class SimpleSessionCallback(val simpleExoPlayer: SimpleExoPlayer) :
         MediaSessionCompat.Callback() {
         override fun onPlay() {
-            simpleExoPlayer.playWhenReady = true
+            mExoSongStateCallback?.onReceivePlay()
         }
 
         override fun onPause() {
-            simpleExoPlayer.playWhenReady = false
+            mExoSongStateCallback?.onReceivePause()
         }
     }
 

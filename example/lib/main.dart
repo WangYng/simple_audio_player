@@ -1,10 +1,8 @@
-import 'dart:convert';
 import 'dart:io';
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:http/http.dart' as http;
 import 'package:path_provider/path_provider.dart';
 import 'package:simple_audio_player/simple_audio_focus_manager.dart';
 import 'package:simple_audio_player/simple_audio_notification_manager.dart';
@@ -38,7 +36,7 @@ class _MyAppState extends State<MyApp> {
 
   File? file;
 
-  String clipArtBase64Data = "";
+  SimpleAudioPlayerState playerState = SimpleAudioPlayerState.idle;
 
   @override
   void initState() {
@@ -57,42 +55,89 @@ class _MyAppState extends State<MyApp> {
       setState(() {
         this.file = file;
       });
-
-      try {
-        final data = await http.get(Uri.parse(clipArt));
-        if (data.statusCode == 200) {
-          clipArtBase64Data = base64Encode(data.bodyBytes);
-        }
-      } catch (e) {
-        print(e);
-      }
     });
 
     player = SimpleAudioPlayer();
-    player.songStateStream.listen((event) {
-      if (event.state == SimpleAudioPlayerSongState.onReady) {
-        setState(() {
-          sliderValue = 0;
-        });
-      } else if (event.state == SimpleAudioPlayerSongState.onPositionChange) {
-        setState(() {
-          sliderValue = event.data[0] / event.data[1];
-        });
-      } else if (event.state == SimpleAudioPlayerSongState.onPlayEnd) {
-        setState(() {
-          sliderValue = 1;
-        });
+    player.eventStream.listen((event) {
+      print("player event : $event");
+      switch (event.type) {
+        case SimpleAudioPlayerEventType.onReady:
+          // noop
+          break;
+        case SimpleAudioPlayerEventType.onPlayEnd:
+          // noop
+          break;
+        case SimpleAudioPlayerEventType.onError:
+          // noop
+          break;
+        case SimpleAudioPlayerEventType.onPositionChange:
+          // noop
+          break;
       }
-      print("song event : $event");
     });
+
+    player.stateStream.listen((event) {
+      print("player state : $event");
+      switch (event) {
+        case SimpleAudioPlayerState.idle:
+          // noop
+          break;
+        case SimpleAudioPlayerState.playing:
+          // noop
+          break;
+        case SimpleAudioPlayerState.pause:
+          // noop
+          break;
+        case SimpleAudioPlayerState.stop:
+          // noop
+          break;
+      }
+
+      setState(() {
+        playerState = event;
+      });
+    });
+
+    player.positionStream.listen((event) {
+      print("player position : $event");
+
+      setState(() {
+        sliderValue = event.position.inMilliseconds / event.duration.inMilliseconds;
+      });
+    });
+
     focusManager.audioFocusStream.listen((event) {
       print("focus event : $event");
     });
+
     focusManager.becomingNoisyStream.listen((event) {
       print("noisy event : $event");
     });
-    notificationManager.notificationStream.listen((event) {
+
+    notificationManager.eventStream.listen((event) async {
       print("notification event : $event");
+
+      switch (event) {
+        case SimpleAudioNotificationType.onPlay:
+          player.play();
+          break;
+        case SimpleAudioNotificationType.onPause:
+          player.pause();
+          break;
+        case SimpleAudioNotificationType.onSkipToNext:
+          player.seekTo(position: 0);
+          player.play();
+          break;
+        case SimpleAudioNotificationType.onSkipToPrevious:
+          player.seekTo(position: 0);
+          player.play();
+          break;
+        case SimpleAudioNotificationType.onStop:
+          player.stop();
+          break;
+      }
+
+      notificationManager.updateNotification();
     });
   }
 
@@ -109,6 +154,8 @@ class _MyAppState extends State<MyApp> {
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
+                Text("playerState : $playerState"),
+                SizedBox(height: 10),
                 CupertinoButton(
                   child: Text("requestAudioFocus"),
                   onPressed: () {
@@ -177,15 +224,22 @@ class _MyAppState extends State<MyApp> {
                       onPressed: () {
                         player.setPlaybackRate(rate: rateValue);
                         player.play();
+                        notificationManager.updateNotification();
                       },
                     ),
                     CupertinoButton(
                       child: Text("pause"),
-                      onPressed: () => player.pause(),
+                      onPressed: () {
+                        player.pause();
+                        notificationManager.updateNotification();
+                      },
                     ),
                     CupertinoButton(
                       child: Text("stop"),
-                      onPressed: () => player.stop(),
+                      onPressed: () {
+                        player.stop();
+                        notificationManager.updateNotification();
+                      },
                     ),
                   ],
                 ),
@@ -251,7 +305,7 @@ class _MyAppState extends State<MyApp> {
                 ),
                 CupertinoButton(
                   child: Text("showNotification"),
-                  onPressed: () => notificationManager.showNotification(player: player, title: "title", artist: "artist", clipArt: clipArtBase64Data),
+                  onPressed: () => notificationManager.showNotification(player: player, title: "title", artist: "artist", clipArt: clipArt),
                 ),
                 CupertinoButton(
                   child: Text("cancelNotification"),

@@ -1,16 +1,46 @@
+import 'dart:async';
+
 import 'package:simple_audio_player/simple_audio_player_api.dart';
 
-enum SimpleAudioPlayerSongState { onReady, onPlayEnd, onError, onPositionChange }
+// 播放器事件类型
+enum SimpleAudioPlayerEventType {
+  onReady,
+  onPlayEnd,
+  onError,
+  onPositionChange,
+}
 
-class SimpleAudioPlayerSongStateEvent {
-  final SimpleAudioPlayerSongState state;
+// 播放器事件
+class SimpleAudioPlayerEvent {
+  final SimpleAudioPlayerEventType type;
   dynamic data;
 
-  SimpleAudioPlayerSongStateEvent(this.state, {this.data});
+  SimpleAudioPlayerEvent(this.type, {this.data});
 
   @override
   String toString() {
-    return 'SimpleAudioPlayerSongStateEvent{state: $state, data: $data}';
+    return 'SimpleAudioPlayerEvent{type: $type, data: $data}';
+  }
+}
+
+// 播放器状态
+enum SimpleAudioPlayerState {
+  idle,
+  playing,
+  pause,
+  stop,
+}
+
+// 播放器进度
+class SimpleAudioPlayerPosition {
+  final Duration position;
+  final Duration duration;
+
+  SimpleAudioPlayerPosition(this.position, this.duration);
+
+  @override
+  String toString() {
+    return 'SimpleAudioPlayerPosition{position: $position, duration: $duration}';
   }
 }
 
@@ -19,29 +49,67 @@ class SimpleAudioPlayer {
 
   final int playerId = _firstPlayerId++;
 
-  late Stream<SimpleAudioPlayerSongStateEvent> songStateStream;
+  StreamController<SimpleAudioPlayerState> _stateController = StreamController.broadcast();
+
+  StreamController<SimpleAudioPlayerPosition> _positionController = StreamController.broadcast();
+
+  // 监听播放器事件
+  StreamSubscription? _eventStreamSubscription;
+
+  // 播放器事件通知
+  late Stream<SimpleAudioPlayerEvent> eventStream;
+
+  // 播放器状态通知
+  Stream<SimpleAudioPlayerState> get stateStream => _stateController.stream;
+
+  // 播放器进度通知
+  Stream<SimpleAudioPlayerPosition> get positionStream => _positionController.stream;
 
   SimpleAudioPlayer() {
     SimpleAudioPlayerApi.init(playerId: playerId);
-    songStateStream = SimpleAudioPlayerApi.songStateStream.where((event) {
+    eventStream = SimpleAudioPlayerApi.songStateStream.where((event) {
       if (event is Map) {
         final playerId = int.tryParse(event["playerId"]?.toString() ?? "") ?? -1;
         return playerId == this.playerId;
       }
       return false;
-    }).map<SimpleAudioPlayerSongStateEvent>((event) {
+    }).map<SimpleAudioPlayerEvent>((event) {
       if (event["event"] == "onReady") {
-        return SimpleAudioPlayerSongStateEvent(SimpleAudioPlayerSongState.onReady, data: event["data"]);
+        return SimpleAudioPlayerEvent(SimpleAudioPlayerEventType.onReady, data: event["data"]);
       } else if (event["event"] == "onPlayEnd") {
-        return SimpleAudioPlayerSongStateEvent(SimpleAudioPlayerSongState.onPlayEnd);
+        return SimpleAudioPlayerEvent(SimpleAudioPlayerEventType.onPlayEnd);
       } else if (event["event"] == "onPositionChange") {
-        return SimpleAudioPlayerSongStateEvent(SimpleAudioPlayerSongState.onPositionChange, data: event["data"]);
+        return SimpleAudioPlayerEvent(SimpleAudioPlayerEventType.onPositionChange, data: event["data"]);
       } else if (event["event"] == "onError") {
-        return SimpleAudioPlayerSongStateEvent(SimpleAudioPlayerSongState.onError, data: event["data"]);
+        return SimpleAudioPlayerEvent(SimpleAudioPlayerEventType.onError, data: event["data"]);
       } else {
-        return SimpleAudioPlayerSongStateEvent(SimpleAudioPlayerSongState.onError, data: event["data"]);
+        return SimpleAudioPlayerEvent(SimpleAudioPlayerEventType.onError, data: event["data"]);
       }
     });
+
+    // 监听播放器事件，更新播放器状态
+    _eventStreamSubscription = eventStream.listen((event) {
+      switch (event.type) {
+        case SimpleAudioPlayerEventType.onReady:
+          // noop
+          break;
+        case SimpleAudioPlayerEventType.onPlayEnd:
+          _stateController.add(SimpleAudioPlayerState.stop);
+          break;
+        case SimpleAudioPlayerEventType.onError:
+          _stateController.add(SimpleAudioPlayerState.stop);
+          break;
+        case SimpleAudioPlayerEventType.onPositionChange:
+          final position = event.data[0];
+          final duration = event.data[1];
+          _positionController.add(SimpleAudioPlayerPosition(Duration(milliseconds: position), Duration(milliseconds: duration)));
+          break;
+      }
+    });
+  }
+
+  void dispose() {
+    _eventStreamSubscription?.cancel();
   }
 
   Future<void> prepare({required String uri}) async {
@@ -49,14 +117,17 @@ class SimpleAudioPlayer {
   }
 
   Future<void> play() async {
+    _stateController.add(SimpleAudioPlayerState.playing);
     return SimpleAudioPlayerApi.play(playerId: playerId);
   }
 
   Future<void> pause() async {
+    _stateController.add(SimpleAudioPlayerState.pause);
     return SimpleAudioPlayerApi.pause(playerId: playerId);
   }
 
   Future<void> stop() async {
+    _stateController.add(SimpleAudioPlayerState.stop);
     return SimpleAudioPlayerApi.stop(playerId: playerId);
   }
 

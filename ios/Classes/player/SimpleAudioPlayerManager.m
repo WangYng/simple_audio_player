@@ -145,9 +145,9 @@
 - (void)addPlayerListenerWithPlayerItem:(AVPlayerItem *)playerItem {
     __weak typeof(self) ws = self;
     self.timeObserverToken = [self.player addPeriodicTimeObserverForInterval:CMTimeMakeWithSeconds(0.5, NSEC_PER_SEC) queue:nil usingBlock:^(CMTime time) {
-            if (ws.player.isPlaying) {
-                [ws updateProgressWithTime:time];
-            }
+        if (ws.player.isPlaying) {
+            [ws updateProgressWithTime:time];
+        }
     }];
     
     self.playToEndObserverToken = [NSNotificationCenter.defaultCenter addObserverForName:AVPlayerItemDidPlayToEndTimeNotification object:playerItem queue:nil usingBlock:^(NSNotification * _Nonnull note) {

@@ -77,6 +77,20 @@ public class SimpleAudioPlayerPlugin implements FlutterPlugin, SimpleAudioPlayer
             }
 
             @Override
+            public void onReceivePlay() {
+                if (notificationStream.event != null) {
+                    notificationStream.event.success("onPlay");
+                }
+            }
+
+            @Override
+            public void onReceivePause() {
+                if (notificationStream.event != null) {
+                    notificationStream.event.success("onPause");
+                }
+            }
+
+            @Override
             public void onPlayEnd() {
                 if (songStateStream != null && songStateStream.event != null) {
                     Map<String, Object> result = new HashMap<>();
@@ -115,61 +129,87 @@ public class SimpleAudioPlayerPlugin implements FlutterPlugin, SimpleAudioPlayer
     @Override
     public void prepare(Context context, int playerId, String uri) {
         PlayerManager player = playerManagerMap.get(playerId);
-        player.prepare(Uri.parse(uri));
+        if (player != null) {
+            player.prepare(Uri.parse(uri));
+        }
     }
 
     @Override
     public void play(Context context, int playerId) {
         PlayerManager player = playerManagerMap.get(playerId);
-        player.play();
+        if (player != null) {
+            player.play();
+        }
     }
 
     @Override
     public void pause(Context context, int playerId) {
         PlayerManager player = playerManagerMap.get(playerId);
-        player.pause();
+        if (player != null) {
+            player.pause();
+        }
     }
 
     @Override
     public void stop(Context context, int playerId) {
         PlayerManager player = playerManagerMap.get(playerId);
-        player.stop();
+        if (player != null) {
+            player.stop();
+        }
     }
 
     @Override
     public void seekTo(Context context, int playerId, int position) {
         PlayerManager player = playerManagerMap.get(playerId);
-        player.seekTo(position);
+        if (player != null) {
+            player.seekTo(position);
+        }
     }
 
     @Override
     public void setVolume(Context context, int playerId, double volume) {
         PlayerManager player = playerManagerMap.get(playerId);
-        player.setVolume(volume);
+        if (player != null) {
+            player.setVolume(volume);
+        }
     }
 
     @Override
     public void setPlaybackRate(Context context, int playerId, double playbackRate) {
         PlayerManager player = playerManagerMap.get(playerId);
-        player.setRate(playbackRate);
+        if (player != null) {
+            player.setRate(playbackRate);
+        }
     }
 
     @Override
     public int getCurrentPosition(Context context, int playerId) {
         PlayerManager player = playerManagerMap.get(playerId);
-        return player.getCurrentPosition();
+        if (player != null) {
+            return player.getCurrentPosition();
+        } else {
+            return 0;
+        }
     }
 
     @Override
     public int getDuration(Context context, int playerId) {
         PlayerManager player = playerManagerMap.get(playerId);
-        return player.getDuration();
+        if (player != null) {
+            return player.getDuration();
+        } else {
+            return 0;
+        }
     }
 
     @Override
     public double getPlaybackRate(Context context, int playerId) {
         PlayerManager player = playerManagerMap.get(playerId);
-        return player.getPlaybackRate();
+        if (player != null) {
+            return player.getPlaybackRate();
+        } else {
+            return 1;
+        }
     }
 
     @Override

@@ -8,7 +8,7 @@ A simple audio player for Flutter.
 
 ```yaml
 dependencies:
-  simple_audio_player: ^1.0.2
+  simple_audio_player: ^1.1.0
 ```
 
 2. Install it
@@ -25,15 +25,54 @@ $ flutter packages get
     super.initState();
 
     simpleAudioPlayer = SimpleAudioPlayer();
-    simpleAudioPlayer.songStateStream.listen((event) {
-      print("song event : $event");
+    simpleAudioPlayer.eventStream.listen((event) {
+      print("player event : $event");
+      switch (event.type) {
+        case SimpleAudioPlayerEventType.onReady:
+        // noop
+          break;
+        case SimpleAudioPlayerEventType.onPlayEnd:
+        // noop
+          break;
+        case SimpleAudioPlayerEventType.onError:
+        // noop
+          break;
+        case SimpleAudioPlayerEventType.onPositionChange:
+        // noop
+          break;
+      }
     });
+
+    simpleAudioPlayer.stateStream.listen((event) {
+      print("player state : $event");
+      switch (event) {
+        case SimpleAudioPlayerState.idle:
+        // noop
+          break;
+        case SimpleAudioPlayerState.playing:
+        // noop
+          break;
+        case SimpleAudioPlayerState.pause:
+        // noop
+          break;
+        case SimpleAudioPlayerState.stop:
+        // noop
+          break;
+      }
+    });
+
+    simpleAudioPlayer.positionStream.listen((event) {
+      print("player position : $event");
+    });
+
     focusManager.audioFocusStream.listen((event) {
       print("focus event : $event");
     });
+    
     focusManager.becomingNoisyStream.listen((event) {
       print("becoming noisy event : $event");
     });
+    
     notificationManager.notificationStream.listen((event) {
       print("notification event : $event");
     });
@@ -82,7 +121,7 @@ $ flutter packages get
   ),
   CupertinoButton(
     child: Text("showNotification"),
-    onPressed: () => notificationManager.showNotification(player: player, title: "title", artist: "artist", clipArt: ""),
+    onPressed: () => notificationManager.showNotification(player: player, title: "title", artist: "artist", clipArt: "https://xxxxx"),
   ),
   CupertinoButton(
     child: Text("cancelNotification"),

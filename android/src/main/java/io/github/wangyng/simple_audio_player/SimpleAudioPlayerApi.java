@@ -152,7 +152,7 @@ public interface SimpleAudioPlayerApi {
                     Map<String, Object> wrapped = new HashMap<>();
                     try {
                         HashMap<String, Object> params = (HashMap<String, Object>) message;
-                        int playerId = (int)params.get("playerId");
+                        int playerId = (int) params.get("playerId");
                         api.init(context, playerId);
                         wrapped.put("result", null);
                     } catch (Exception exception) {
@@ -172,8 +172,8 @@ public interface SimpleAudioPlayerApi {
                     Map<String, Object> wrapped = new HashMap<>();
                     try {
                         HashMap<String, Object> params = (HashMap<String, Object>) message;
-                        int playerId = (int)params.get("playerId");
-                        String uri = (String)params.get("uri");
+                        int playerId = (int) params.get("playerId");
+                        String uri = (String) params.get("uri");
                         if (uri.startsWith("asset:///")) {
                             FlutterLoader loader = FlutterInjector.instance().flutterLoader();
                             String filename = loader.getLookupKeyForAsset(uri.substring("asset:///".length()));
@@ -199,7 +199,7 @@ public interface SimpleAudioPlayerApi {
                     Map<String, Object> wrapped = new HashMap<>();
                     try {
                         HashMap<String, Object> params = (HashMap<String, Object>) message;
-                        int playerId = (int)params.get("playerId");
+                        int playerId = (int) params.get("playerId");
                         api.play(context, playerId);
                         wrapped.put("result", null);
                     } catch (Exception exception) {
@@ -219,7 +219,7 @@ public interface SimpleAudioPlayerApi {
                     Map<String, Object> wrapped = new HashMap<>();
                     try {
                         HashMap<String, Object> params = (HashMap<String, Object>) message;
-                        int playerId = (int)params.get("playerId");
+                        int playerId = (int) params.get("playerId");
                         api.pause(context, playerId);
                         wrapped.put("result", null);
                     } catch (Exception exception) {
@@ -239,7 +239,7 @@ public interface SimpleAudioPlayerApi {
                     Map<String, Object> wrapped = new HashMap<>();
                     try {
                         HashMap<String, Object> params = (HashMap<String, Object>) message;
-                        int playerId = (int)params.get("playerId");
+                        int playerId = (int) params.get("playerId");
                         api.stop(context, playerId);
                         wrapped.put("result", null);
                     } catch (Exception exception) {
@@ -259,8 +259,8 @@ public interface SimpleAudioPlayerApi {
                     Map<String, Object> wrapped = new HashMap<>();
                     try {
                         HashMap<String, Object> params = (HashMap<String, Object>) message;
-                        int playerId = (int)params.get("playerId");
-                        int position = (int)params.get("position");
+                        int playerId = (int) params.get("playerId");
+                        int position = (int) params.get("position");
                         api.seekTo(context, playerId, position);
                         wrapped.put("result", null);
                     } catch (Exception exception) {
@@ -280,8 +280,8 @@ public interface SimpleAudioPlayerApi {
                     Map<String, Object> wrapped = new HashMap<>();
                     try {
                         HashMap<String, Object> params = (HashMap<String, Object>) message;
-                        int playerId = (int)params.get("playerId");
-                        double volume = (double)params.get("volume");
+                        int playerId = (int) params.get("playerId");
+                        double volume = (double) params.get("volume");
                         api.setVolume(context, playerId, volume);
                         wrapped.put("result", null);
                     } catch (Exception exception) {
@@ -301,8 +301,8 @@ public interface SimpleAudioPlayerApi {
                     Map<String, Object> wrapped = new HashMap<>();
                     try {
                         HashMap<String, Object> params = (HashMap<String, Object>) message;
-                        int playerId = (int)params.get("playerId");
-                        double playbackRate = (double)params.get("playbackRate");
+                        int playerId = (int) params.get("playerId");
+                        double playbackRate = (double) params.get("playbackRate");
                         api.setPlaybackRate(context, playerId, playbackRate);
                         wrapped.put("result", null);
                     } catch (Exception exception) {
@@ -322,7 +322,7 @@ public interface SimpleAudioPlayerApi {
                     Map<String, Object> wrapped = new HashMap<>();
                     try {
                         HashMap<String, Object> params = (HashMap<String, Object>) message;
-                        int playerId = (int)params.get("playerId");
+                        int playerId = (int) params.get("playerId");
                         int result = api.getCurrentPosition(context, playerId);
                         wrapped.put("result", result);
                     } catch (Exception exception) {
@@ -342,7 +342,7 @@ public interface SimpleAudioPlayerApi {
                     Map<String, Object> wrapped = new HashMap<>();
                     try {
                         HashMap<String, Object> params = (HashMap<String, Object>) message;
-                        int playerId = (int)params.get("playerId");
+                        int playerId = (int) params.get("playerId");
                         int result = api.getDuration(context, playerId);
                         wrapped.put("result", result);
                     } catch (Exception exception) {
@@ -362,7 +362,7 @@ public interface SimpleAudioPlayerApi {
                     Map<String, Object> wrapped = new HashMap<>();
                     try {
                         HashMap<String, Object> params = (HashMap<String, Object>) message;
-                        int playerId = (int)params.get("playerId");
+                        int playerId = (int) params.get("playerId");
                         double result = api.getPlaybackRate(context, playerId);
                         wrapped.put("result", result);
                     } catch (Exception exception) {
@@ -418,10 +418,10 @@ public interface SimpleAudioPlayerApi {
                     Map<String, Object> wrapped = new HashMap<>();
                     try {
                         HashMap<String, Object> params = (HashMap<String, Object>) message;
-                        int playerId = (int)params.get("playerId");
-                        String title = (String)params.get("title");
-                        String artist = (String)params.get("artist");
-                        String clipArt = (String)params.get("clipArt");
+                        int playerId = (int) params.get("playerId");
+                        String title = (String) params.get("title");
+                        String artist = (String) params.get("artist");
+                        String clipArt = (String) params.get("clipArt");
                         api.showNotification(context, playerId, title, artist, clipArt);
                         wrapped.put("result", null);
                     } catch (Exception exception) {
@@ -452,7 +452,7 @@ public interface SimpleAudioPlayerApi {
             }
         }
 
-   }
+    }
 
     static HashMap<String, Object> wrapError(Exception exception) {
         HashMap<String, Object> errorMap = new HashMap<>();

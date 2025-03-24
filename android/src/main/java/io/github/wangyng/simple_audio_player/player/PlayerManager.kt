@@ -35,6 +35,10 @@ interface PlayerManager {
 
         fun onReady()
 
+        fun onReceivePlay()
+
+        fun onReceivePause()
+
         fun onPlayEnd()
 
         fun onError(message: String)
