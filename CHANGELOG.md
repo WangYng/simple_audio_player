@@ -66,3 +66,6 @@ update README.md
 
 ## 1.1.3
 fix some issues.
+
+## 1.1.4
+fix some issues.

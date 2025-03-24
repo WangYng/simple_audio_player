@@ -189,15 +189,15 @@ class ExoPlayerManager(private val context: Context) : PlayerManager {
 
             return when (keyEvent.keyCode) {
                 KeyEvent.KEYCODE_MEDIA_NEXT -> {
-                    onSkipToNext()
+                    mExoSongStateCallback?.onReceiveSkipToNext()
                     return true
                 }
                 KeyEvent.KEYCODE_MEDIA_PREVIOUS -> {
-                    onSkipToPrevious()
+                    mExoSongStateCallback?.onReceiveSkipToPrevious()
                     return true
                 }
                 KeyEvent.KEYCODE_MEDIA_STOP -> {
-                    onStop()
+                    mExoSongStateCallback?.onReceiveStop()
                     return true
                 }
                 else -> super.onMediaButtonEvent(mediaButtonEvent)
@@ -210,18 +210,6 @@ class ExoPlayerManager(private val context: Context) : PlayerManager {
 
         override fun onPause() {
             mExoSongStateCallback?.onReceivePause()
-        }
-
-        override fun onSkipToNext() {
-            mExoSongStateCallback?.onReceiveSkipToNext()
-        }
-
-        override fun onSkipToPrevious() {
-            mExoSongStateCallback?.onReceiveSkipToPrevious()
-        }
-
-        override fun onStop() {
-            mExoSongStateCallback?.onReceiveStop()
         }
     }
 

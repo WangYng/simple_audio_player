@@ -59,7 +59,7 @@ class _MyAppState extends State<MyApp> {
 
     player = SimpleAudioPlayer();
     player.eventStream.listen((event) {
-      // print("player event : $event");
+      print("player event : $event");
       switch (event.type) {
         case SimpleAudioPlayerEventType.onReady:
           // noop
@@ -78,7 +78,7 @@ class _MyAppState extends State<MyApp> {
     });
 
     player.stateStream.listen((event) {
-      // print("player state : $event");
+      print("player state : $event");
       switch (event) {
         case SimpleAudioPlayerState.idle:
           // noop
@@ -100,7 +100,7 @@ class _MyAppState extends State<MyApp> {
     });
 
     player.positionStream.listen((event) {
-      // print("player position : $event");
+      print("player position : $event");
 
       setState(() {
         sliderValue = event.position.inMilliseconds / event.duration.inMilliseconds;
