@@ -2,7 +2,23 @@ import 'dart:async';
 
 import 'package:simple_audio_player/simple_audio_player_api.dart';
 
-// 播放器事件类型
+@deprecated
+enum SimpleAudioPlayerSongState { onReady, onPlayEnd, onError, onPositionChange }
+
+@deprecated
+class SimpleAudioPlayerSongStateEvent {
+  final SimpleAudioPlayerSongState state;
+  dynamic data;
+
+  SimpleAudioPlayerSongStateEvent(this.state, {this.data});
+
+  @override
+  String toString() {
+    return 'SimpleAudioPlayerSongStateEvent{state: $state, data: $data}';
+  }
+}
+
+// EventType
 enum SimpleAudioPlayerEventType {
   onReady,
   onPlayEnd,
@@ -10,7 +26,7 @@ enum SimpleAudioPlayerEventType {
   onPositionChange,
 }
 
-// 播放器事件
+// Event
 class SimpleAudioPlayerEvent {
   final SimpleAudioPlayerEventType type;
   dynamic data;
@@ -23,7 +39,7 @@ class SimpleAudioPlayerEvent {
   }
 }
 
-// 播放器状态
+// State
 enum SimpleAudioPlayerState {
   idle,
   playing,
@@ -31,7 +47,7 @@ enum SimpleAudioPlayerState {
   stop,
 }
 
-// 播放器进度
+// Position
 class SimpleAudioPlayerPosition {
   final Duration position;
   final Duration duration;
@@ -65,8 +81,32 @@ class SimpleAudioPlayer {
   // 播放器进度通知
   Stream<SimpleAudioPlayerPosition> get positionStream => _positionController.stream;
 
+  // use eventStream
+  @deprecated
+  late Stream<SimpleAudioPlayerSongStateEvent> songStateStream;
+
   SimpleAudioPlayer() {
     SimpleAudioPlayerApi.init(playerId: playerId);
+    songStateStream = SimpleAudioPlayerApi.songStateStream.where((event) {
+      if (event is Map) {
+        final playerId = int.tryParse(event["playerId"]?.toString() ?? "") ?? -1;
+        return playerId == this.playerId;
+      }
+      return false;
+    }).map<SimpleAudioPlayerSongStateEvent>((event) {
+      if (event["event"] == "onReady") {
+        return SimpleAudioPlayerSongStateEvent(SimpleAudioPlayerSongState.onReady, data: event["data"]);
+      } else if (event["event"] == "onPlayEnd") {
+        return SimpleAudioPlayerSongStateEvent(SimpleAudioPlayerSongState.onPlayEnd);
+      } else if (event["event"] == "onPositionChange") {
+        return SimpleAudioPlayerSongStateEvent(SimpleAudioPlayerSongState.onPositionChange, data: event["data"]);
+      } else if (event["event"] == "onError") {
+        return SimpleAudioPlayerSongStateEvent(SimpleAudioPlayerSongState.onError, data: event["data"]);
+      } else {
+        return SimpleAudioPlayerSongStateEvent(SimpleAudioPlayerSongState.onError, data: event["data"]);
+      }
+    });
+
     eventStream = SimpleAudioPlayerApi.songStateStream.where((event) {
       if (event is Map) {
         final playerId = int.tryParse(event["playerId"]?.toString() ?? "") ?? -1;

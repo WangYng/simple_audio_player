@@ -60,3 +60,6 @@ fix some issues.
 
 ## 1.1.1
 update README.md
+
+## 1.1.2
+update README.md
