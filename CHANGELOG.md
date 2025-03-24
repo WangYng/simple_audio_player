@@ -57,3 +57,6 @@ fix ios crash.
 
 ## 1.1.0
 fix some issues.
+
+## 1.1.1
+update README.md
