@@ -1,12 +1,15 @@
 package io.github.wangyng.simple_audio_player.player
 
 import android.content.Context
+import android.content.Intent
 import android.net.Uri
 import android.os.Handler
 import android.os.Looper
 import android.os.Message
 import android.support.v4.media.session.MediaSessionCompat
 import android.support.v4.media.session.PlaybackStateCompat
+import android.view.KeyEvent
+import android.view.ViewConfiguration
 import com.google.android.exoplayer2.C.CONTENT_TYPE_MUSIC
 import com.google.android.exoplayer2.C.USAGE_MEDIA
 import com.google.android.exoplayer2.MediaItem
@@ -177,12 +180,48 @@ class ExoPlayerManager(private val context: Context) : PlayerManager {
 
     private inner class SimpleSessionCallback(val simpleExoPlayer: SimpleExoPlayer) :
         MediaSessionCompat.Callback() {
+
+        override fun onMediaButtonEvent(mediaButtonEvent: Intent?): Boolean {
+            val keyEvent = mediaButtonEvent?.getParcelableExtra<KeyEvent>(Intent.EXTRA_KEY_EVENT)
+            if (keyEvent == null || keyEvent.action != KeyEvent.ACTION_DOWN) {
+                return false
+            }
+
+            return when (keyEvent.keyCode) {
+                KeyEvent.KEYCODE_MEDIA_NEXT -> {
+                    onSkipToNext()
+                    return true
+                }
+                KeyEvent.KEYCODE_MEDIA_PREVIOUS -> {
+                    onSkipToPrevious()
+                    return true
+                }
+                KeyEvent.KEYCODE_MEDIA_STOP -> {
+                    onStop()
+                    return true
+                }
+                else -> super.onMediaButtonEvent(mediaButtonEvent)
+            }
+        }
+
         override fun onPlay() {
             mExoSongStateCallback?.onReceivePlay()
         }
 
         override fun onPause() {
             mExoSongStateCallback?.onReceivePause()
+        }
+
+        override fun onSkipToNext() {
+            mExoSongStateCallback?.onReceiveSkipToNext()
+        }
+
+        override fun onSkipToPrevious() {
+            mExoSongStateCallback?.onReceiveSkipToPrevious()
+        }
+
+        override fun onStop() {
+            mExoSongStateCallback?.onReceiveStop()
         }
     }
 

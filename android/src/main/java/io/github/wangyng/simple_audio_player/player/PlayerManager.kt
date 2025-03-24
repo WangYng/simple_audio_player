@@ -35,15 +35,21 @@ interface PlayerManager {
 
         fun onReady()
 
-        fun onReceivePlay()
-
-        fun onReceivePause()
-
         fun onPlayEnd()
 
         fun onError(message: String)
 
         fun onPositionChange(position: Int, duration: Int)
+
+        fun onReceivePlay()
+
+        fun onReceivePause()
+
+        fun onReceiveSkipToNext()
+
+        fun onReceiveSkipToPrevious()
+
+        fun onReceiveStop()
     }
 }
 

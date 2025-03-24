@@ -63,3 +63,6 @@ update README.md
 
 ## 1.1.2
 update README.md
+
+## 1.1.3
+fix some issues.

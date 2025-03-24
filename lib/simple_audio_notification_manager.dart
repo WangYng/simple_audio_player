@@ -30,14 +30,13 @@ class SimpleAudioNotificationManager {
 
   factory SimpleAudioNotificationManager() => _instance ?? SimpleAudioNotificationManager._internal();
 
-  // 缓存的图片
   Map<String, String> imageBase64Cache = HashMap();
 
   _NotificationData? _notificationData;
 
   bool get isShow => _notificationData != null;
 
-  // 事件通知
+  // event
   Stream<SimpleAudioNotificationType> eventStream = SimpleAudioPlayerApi.notificationStream.map((event) {
     if (event == "onPlay") {
       return SimpleAudioNotificationType.onPlay;
@@ -54,9 +53,8 @@ class SimpleAudioNotificationManager {
     }
   });
 
-  // 显示通知
-  Future<void> showNotification(
-      {required SimpleAudioPlayer player, required String title, required String artist, required String clipArt}) {
+  // show notification
+  Future<void> showNotification({required SimpleAudioPlayer player, required String title, required String artist, required String clipArt}) {
     _notificationData = _NotificationData(player, title, artist, clipArt);
 
     if (imageBase64Cache.containsKey(clipArt)) {
@@ -64,7 +62,7 @@ class SimpleAudioNotificationManager {
       return SimpleAudioPlayerApi.showNotification(playerId: player.playerId, title: title, artist: artist, clipArt: base64Image);
     }
 
-    // 从图片缓存中加载图片
+    // load image form network
     final NetworkImage imageProvider = NetworkImage(clipArt);
     final ImageStream stream = imageProvider.resolve(ImageConfiguration.empty);
     stream.addListener(ImageStreamListener((ImageInfo info, bool synchronous) async {
@@ -73,7 +71,7 @@ class SimpleAudioNotificationManager {
         imageBase64Cache.clear();
         imageBase64Cache[clipArt] = base64Encode(byteData.buffer.asUint8List());
 
-        // 图片加载完成，更新通知
+        // load image done
         updateNotification();
       }
     }));
@@ -81,7 +79,7 @@ class SimpleAudioNotificationManager {
     return SimpleAudioPlayerApi.showNotification(playerId: player.playerId, title: title, artist: artist, clipArt: "");
   }
 
-  // 更新通知
+  // update notification
   Future<void> updateNotification() async {
     if (_notificationData != null) {
       final player = _notificationData!.player;
@@ -93,7 +91,7 @@ class SimpleAudioNotificationManager {
     }
   }
 
-  // 取消通知
+  // cancel notification
   Future<void> cancelNotification() {
     _notificationData = null;
 

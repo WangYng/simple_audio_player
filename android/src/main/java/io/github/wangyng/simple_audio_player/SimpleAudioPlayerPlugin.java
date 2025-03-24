@@ -65,6 +65,7 @@ public class SimpleAudioPlayerPlugin implements FlutterPlugin, SimpleAudioPlayer
     public void init(Context context, int playerId) {
         PlayerManager player = new ExoPlayerManager(context);
         player.setCallback(new PlayerManager.SongStateCallback() {
+
             @Override
             public void onReady() {
                 if (songStateStream != null && songStateStream.event != null) {
@@ -73,20 +74,6 @@ public class SimpleAudioPlayerPlugin implements FlutterPlugin, SimpleAudioPlayer
                     result.put("event", "onReady");
                     result.put("data", player.getDuration());
                     songStateStream.event.success(result);
-                }
-            }
-
-            @Override
-            public void onReceivePlay() {
-                if (notificationStream.event != null) {
-                    notificationStream.event.success("onPlay");
-                }
-            }
-
-            @Override
-            public void onReceivePause() {
-                if (notificationStream.event != null) {
-                    notificationStream.event.success("onPause");
                 }
             }
 
@@ -119,6 +106,41 @@ public class SimpleAudioPlayerPlugin implements FlutterPlugin, SimpleAudioPlayer
                     result.put("event", "onPositionChange");
                     result.put("data", new long[]{position, duration});
                     songStateStream.event.success(result);
+                }
+            }
+
+            @Override
+            public void onReceivePlay() {
+                if (notificationStream.event != null) {
+                    notificationStream.event.success("onPlay");
+                }
+            }
+
+            @Override
+            public void onReceivePause() {
+                if (notificationStream.event != null) {
+                    notificationStream.event.success("onPause");
+                }
+            }
+
+            @Override
+            public void onReceiveSkipToNext() {
+                if (notificationStream.event != null) {
+                    notificationStream.event.success("onSkipToNext");
+                }
+            }
+
+            @Override
+            public void onReceiveSkipToPrevious() {
+                if (notificationStream.event != null) {
+                    notificationStream.event.success("onSkipToPrevious");
+                }
+            }
+
+            @Override
+            public void onReceiveStop() {
+                if (notificationStream.event != null) {
+                    notificationStream.event.success("onStop");
                 }
             }
         });
