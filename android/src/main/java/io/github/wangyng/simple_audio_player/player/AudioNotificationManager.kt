@@ -68,37 +68,37 @@ class AudioNotificationManager(private val context: Context) : BroadcastReceiver
             context,
             NOTIFICATION_REQUEST_CODE,
             Intent(ACTION_PAUSE).setPackage(context.packageName),
-            PendingIntent.FLAG_CANCEL_CURRENT
+            PendingIntent.FLAG_IMMUTABLE
         )
         mPlayIntent = PendingIntent.getBroadcast(
             context,
             NOTIFICATION_REQUEST_CODE,
             Intent(ACTION_PLAY).setPackage(context.packageName),
-            PendingIntent.FLAG_CANCEL_CURRENT
+            PendingIntent.FLAG_IMMUTABLE
         )
         mPreviousIntent = PendingIntent.getBroadcast(
             context,
             NOTIFICATION_REQUEST_CODE,
             Intent(ACTION_PREV).setPackage(context.packageName),
-            PendingIntent.FLAG_CANCEL_CURRENT
+            PendingIntent.FLAG_IMMUTABLE
         )
         mNextIntent = PendingIntent.getBroadcast(
             context,
             NOTIFICATION_REQUEST_CODE,
             Intent(ACTION_NEXT).setPackage(context.packageName),
-            PendingIntent.FLAG_CANCEL_CURRENT
+            PendingIntent.FLAG_IMMUTABLE
         )
         mStopIntent = PendingIntent.getBroadcast(
             context,
             NOTIFICATION_REQUEST_CODE,
             Intent(ACTION_STOP).setPackage(context.packageName),
-            PendingIntent.FLAG_CANCEL_CURRENT
+            PendingIntent.FLAG_IMMUTABLE
         )
         mOpenAppIntent = PendingIntent.getActivity(
             context,
             NOTIFICATION_REQUEST_CODE,
             context.packageManager.getLaunchIntentForPackage(context.packageName),
-            PendingIntent.FLAG_CANCEL_CURRENT
+            PendingIntent.FLAG_IMMUTABLE
         )
         mNotificationManager?.cancelAll()
     }
